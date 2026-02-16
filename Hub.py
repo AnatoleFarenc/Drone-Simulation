@@ -1,15 +1,16 @@
-from typing import LiteralString, Tuple
+from typing import LiteralString, Tuple, Dict
 
 
 class Hub():
     def __init__(self, name: LiteralString, pos: Tuple[int, int],
-                 color: LiteralString):
+                 complementary_setting: Dict = {}):
         self.__name = None
         self.__pos = None
         self.__color = None
+        self.__max_drone = None
         self.name = name
         self.pos = pos
-        self.color = color
+        self.__c_setting = complementary_setting
 
     @property
     def name(self) -> LiteralString:
@@ -35,20 +36,20 @@ class Hub():
         if not isinstance(coordinates, tuple):
             raise TypeError("Error: pos must be a tuple of two integers")
         x, y = coordinates
-        if isinstance(x, int) and isinstance(y, int) and x >= 0 and y >= 0:
+        if isinstance(x, int) and isinstance(y, int):
             self.__pos = coordinates
         else:
-            raise ValueError("Error: coordinates is negative integers")
+            raise ValueError("Error: coordinates must be integers")
 
     @property
-    def color(self) -> LiteralString:
-        """Return hub color"""
-        return self.__color
+    def c_setting(self) -> int:
+        """ Return max drone on this hub """
+        return self.__c_setting
 
-    @color.setter
-    def color(self, value: LiteralString) -> None:
-        """Set hub color (non-empty string)"""
-        if isinstance(value, str) and value:
-            self.__color = value
+    @c_setting.setter
+    def c_setting(self, complementary_setting: Dict) -> None:
+        """ Set max drone in thi hub """
+        if isinstance(complementary_setting, dict):
+            self.__c_setting = complementary_setting
         else:
-            raise ValueError("Error: color must be a non-empty string")
+            raise ValueError("Error: complementary_setting must be dict")

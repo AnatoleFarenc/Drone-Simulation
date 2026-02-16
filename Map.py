@@ -1,4 +1,4 @@
-from typing import List, Self, LiteralString
+from typing import List, Self, LiteralString, Dict
 from Hub import Hub
 import re
 
@@ -9,7 +9,7 @@ class Map():
         self.__start = None
         self.__end = None
         self.__hub_lst: List[Hub] = []
-        self.__connection_lst: List[Hub] = []
+        self.__connection_lst: List[(str, str)] = []
 
     @property
     def nb_drone(self) -> int:
@@ -60,11 +60,20 @@ class Map():
 
     def append_connection(self, name: LiteralString) -> None:
         """ Append connection """
-        for hub in self.hub_lst:
-            if hub.name in name:
-                self.__connection_lst.append(hub)
-                return
-        raise ValueError("Error Hub dosn't exist")
+        enter, exit = name.split('-', 1)
+        self.connection_lst.append((enter, exit))
+
+    @staticmethod
+    def parse_complementary_data(data: str) -> Dict:
+        """ Parse they complementary data and return dict with same """
+        """ parameters """
+        data = re.sub(r"[\[\]]", '', data)
+        data_dict = dict()
+        data_p = data.split(' ')
+        for elem in data_p:
+            key, value = elem.split('=')
+            data_dict.update({key: value})
+        return data_dict
 
     @classmethod
     def map_init(cls, data: dict) -> Self:
@@ -75,16 +84,16 @@ class Map():
                 n_map.nb_drone = int(value)
                 continue
             elif "hub" in key:
-                _, name, x, y, color = value.split(" ", 4)
+                _, name, x, y, c_data = value.split(" ", 4)
                 x = int(x)
                 y = int(y)
-                color = re.findall("=([^]]+)]", color)[0]
+                c_setting = n_map.parse_complementary_data(c_data)
                 if name == "start":
-                    n_map.start = Hub(name, (x, y), color)
+                    n_map.start = Hub(name, (x, y), c_setting)
                 elif name == "goal":
-                    n_map.end = Hub(name, (x, y), color)
+                    n_map.end = Hub(name, (x, y), c_setting)
                 else:
-                    n_map.append_hub(Hub(name, (x, y), color))
+                    n_map.append_hub(Hub(name, (x, y), c_setting))
                 continue
             elif "connection" in key:
                 n_map.append_connection(value)
