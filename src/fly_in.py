@@ -6,7 +6,7 @@ import sys
 def main():
     # path = "maps/easy/01_linear_path.txt"
     # path = "maps/hard/01_maze_nightmare.txt"
-    path = "maps/hard/02_capacity_hell.txt"
+    path = "data/maps/hard/02_capacity_hell.txt"
     try:
         map_data = get_data(path)
         check_data(map_data)

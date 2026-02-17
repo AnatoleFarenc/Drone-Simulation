@@ -1,4 +1,5 @@
 SRC = src
+INCLUDES = data
 EXE = $(SRC).fly_in
 VENV = env
 PYTHON = $(VENV)/bin/python3
@@ -29,6 +30,7 @@ install:
 
 	@echo "\n$(YELLOW)Installing dependencies...$(RESET)"
 	@$(PIP) install -r $(REQUIREMENTS) > /dev/null 2>&1
+	
 	@echo "$(GREEN)All dependencies successfully installed$(RESET)"
 
 	@echo "\n$(SUCCESS)Project can now be run safely!$(RESET)"
@@ -54,6 +56,7 @@ debug:
 
 clean:
 	@echo "$(YELLOW)Initiating cleanup operation...$(RESET)"
+	@found=0; \
 	for i in $(TRASH); do \
 		if [ -d "$$i" ]; then \
 			echo " - Removed directory $(RED)'$$i'$(RESET)"; \
