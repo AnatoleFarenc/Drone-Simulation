@@ -36,7 +36,7 @@ install:
 	@echo "\n$(SUCCESS)Project can now be run safely!$(RESET)"
 
 run:
-	$(PYTHON) -m $(EXE)
+	@$(PYTHON) -m $(EXE)
 
 lint:
 	@echo "$(BOLD)Verifying project source code:$(RESET)"

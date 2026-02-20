@@ -1,22 +1,24 @@
-from typing import LiteralString, Tuple, Dict
+from typing import Tuple, Dict, List, Any
 
 
 class Hub():
-    def __init__(self, name: LiteralString, pos: Tuple[int, int],
-                 complementary_setting: Dict = {}):
-        self.__name = None
-        self.__pos = None
+    def __init__(self, name: str, pos: Tuple[int, int],
+                 complementary_setting: Dict[Any, Any]):
+        """ Init Hub parameters """
+        self.__c_setting: Dict[Any, Any] = {}
+        self.__neighbors: List["Hub"] = []
+
         self.name = name
         self.pos = pos
-        self.__c_setting = complementary_setting
+        self.c_setting = complementary_setting
 
     @property
-    def name(self) -> LiteralString:
+    def name(self) -> str:
         """Return hub name"""
         return self.__name
 
     @name.setter
-    def name(self, value: LiteralString) -> None:
+    def name(self, value: str) -> None:
         """Set hub name (non-empty string)"""
         if isinstance(value, str) and value:
             self.__name = value
@@ -40,12 +42,12 @@ class Hub():
             raise ValueError("Error: coordinates must be integers")
 
     @property
-    def c_setting(self) -> int:
+    def c_setting(self) -> Dict[Any, Any]:
         """ Return max drone on this hub """
         return self.__c_setting
 
     @c_setting.setter
-    def c_setting(self, complementary_setting: Dict) -> None:
+    def c_setting(self, complementary_setting: Dict[Any, Any]) -> None:
         """ Set max drone in thi hub """
         if isinstance(complementary_setting, dict):
             self.__c_setting = complementary_setting
@@ -53,4 +55,13 @@ class Hub():
             raise ValueError("Error: complementary_setting must be dict")
 
     def __str__(self) -> str:
-        return self.name
+        return self.__name
+
+    @property
+    def neighbors(self) -> List["Hub"]:
+        """ Return neibors list of this hub """
+        return self.__neighbors
+
+    def append_neighbor(self, neighbor: "Hub") -> None:
+        """ Append hub in neighbors list """
+        self.__neighbors.append(neighbor)

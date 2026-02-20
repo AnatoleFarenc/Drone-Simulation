@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List, Tuple
 import re
 import sys
 
@@ -33,7 +33,7 @@ def get_data(map_path: str) -> Dict:
     return map_data
 
 
-def check_meta_data(meta_data: str, valid_setting: list) -> bool:
+def check_meta_data(meta_data: str, valid_setting: List[str]) -> None:
     # check braket
     if meta_data[0] != '[' or meta_data[-1] != ']':
         raise ValueError("Error: meta data must be contain in '[]': "
@@ -100,7 +100,7 @@ def check_data(map_data: Dict) -> None:
     # check connection
     hub_con = [value for key, value in map_data.items()
                if key.startswith("connection")]
-    connection_lst = []
+    connection_lst: List[Tuple[str, str]] = []
     for con in hub_con:
         # check existing hub
         con_data = con.split(' ')
