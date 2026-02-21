@@ -5,8 +5,6 @@ from .Hub import Hub
 class Connection():
     def __init__(self, hubs: Tuple[Hub, Hub],
                  complementary_setting: Dict = {}) -> None:
-        self.__hubs = None
-        self.__c_setting = None
         self.hubs = hubs
         self.c_setting = complementary_setting
 

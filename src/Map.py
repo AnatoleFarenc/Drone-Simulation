@@ -1,6 +1,7 @@
 from typing import List, Self, LiteralString, Dict
 from .Hub import Hub
 from .Connection import Connection
+from .Drone import Drone
 import re
 
 
@@ -9,8 +10,9 @@ class Map():
         self.__nb_drone = 0
         self.__start = None
         self.__end = None
-        self.__hub_lst: List[Hub] = []
-        self.__connection_lst: List[Connection] = []
+        self.__hub_lst = []
+        self.__connection_lst = []
+        self.__drone_lst = []
 
     @property
     def nb_drone(self) -> int:
@@ -54,6 +56,13 @@ class Map():
         """ Append hub """
         self.__hub_lst.append(hub)
 
+    def get_hub(self, hub_name: str) -> Hub | None:
+        """ Return hub in hub list wiht are name """
+        for hub in self.hub_lst:
+            if hub.name == hub_name:
+                return hub
+        return None
+
     @property
     def connection_lst(self) -> List[Connection]:
         """ Return connection list """
@@ -72,6 +81,11 @@ class Map():
             self.connection_lst.append(new_con)
         else:
             raise ValueError("Error: invalid connection")
+
+    @property
+    def drone_lst(self) -> List[Drone]:
+        """ Return Drone list """
+        return self.__drone_lst
 
     @staticmethod
     def parse_complementary_data(data: str) -> Dict:
@@ -131,3 +145,44 @@ class Map():
                     raise ValueError("Missing data connection")
                 continue
         return n_map
+
+    def set_neighbor(self) -> None:
+        """ Add hub neighbor to same hub in list """
+        hub_lst = self.hub_lst.copy()
+        hub_lst.append(self.start)
+        hub_lst.append(self.end)
+        for hub in hub_lst:
+            for con in self.connection_lst:
+                hub_1, hub_2 = con.hubs
+                if hub.name == hub_1.name:
+                    hub.append_neighbor(hub_2)
+                elif hub.name == hub_2.name:
+                    hub.append_neighbor(hub_1)
+
+    def gen_drone(self) -> None:
+        """ gen drone list """
+        for i in range(self.nb_drone):
+            name = f"drone{i}"
+            self.drone_lst.append(Drone(name, self.start))
+
+    def set_target_drone(self, drone: Drone, target: Hub) -> None:
+        """ Set drone to the next hub [target] """
+        if drone.c_hub not in target.neighbors:
+            raise ValueError("Error: target isn't attainable")
+
+        if target.c_setting.get('zone'):
+            if target.c_setting['zone'] == 'restricted':
+                drone.len_path = 2
+        else:
+            drone.len_path = 1
+
+        drone.n_hub = target
+        drone.nb_move = 0
+
+    def move_drone(self) -> None:
+        """ Move drones """
+        for drone in self.drone_lst:
+            drone.nb_move += 1
+            if drone.nb_move >= drone.len_path:
+                drone.c_hub = drone.n_hub
+                drone.n_hub = None
