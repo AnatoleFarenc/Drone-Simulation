@@ -182,6 +182,7 @@ class Map():
     def set_target_drone(self, drone: Drone, target: Hub) -> None:
         """ Set drone to the next hub [target] """
         if drone.c_hub not in target.neighbors:
+            print([n.name for n in target.neighbors])
             raise ValueError("Error: target isn't attainable")
 
         if target.c_setting.get('zone'):
@@ -201,4 +202,3 @@ class Map():
                 drone.c_hub.nb_drone -= 1
                 drone.n_hub.nb_drone += 1
                 drone.c_hub = drone.n_hub
-                drone.n_hub = None

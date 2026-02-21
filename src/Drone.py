@@ -6,7 +6,7 @@ class Drone():
         """ Set default setting """
         self.name = name
         self.c_hub = c_hub
-        self.n_hub = None
+        self.n_hub = c_hub
         self.len_path = 1
         self.nb_move = 0
 

@@ -48,22 +48,19 @@ def main():
 
     map.set_neighbor()
 
-    # map.gen_drone()
-    # for drone in map.drone_lst:
-    #     map.set_target_drone(drone, map.get_hub('gate1'))
-
-    # print(f"drone in hub: {map.get_hub('start').nb_drone}")
-    # debug_lst(map.drone_lst)
-    # map.move_drone()
-    # for drone in map.drone_lst:
-    #     if drone.c_hub.name == "gate1":
-    #         print(drone.name)
-    # print(f"drone in hub: {map.get_hub('start').nb_drone}")
-
-    path_find = Pathinder(map)
-    path = path_find.get_path()
-    for i, hub in enumerate(path):
-        print(f"{i}: {hub.name}")
+    end = False
+    find_path = Pathinder(map)
+    map.gen_drone()
+    i = 1
+    while not end:
+        for drone in map.drone_lst:
+            path = find_path.get_path()
+            map.set_target_drone(drone, path[i])
+            print(f"{drone.name} go to {drone.n_hub.name}")
+        map.move_drone()
+        i += 1
+        if map.end.nb_drone == map.nb_drone:
+            end = True
 
 
 if __name__ == "__main__":
