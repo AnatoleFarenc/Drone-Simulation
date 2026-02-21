@@ -58,6 +58,10 @@ class Map():
 
     def get_hub(self, hub_name: str) -> Hub | None:
         """ Return hub in hub list wiht are name """
+        if hub_name == self.start.name:
+            return self.start
+        if hub_name == self.end.name:
+            return self.end
         for hub in self.hub_lst:
             if hub.name == hub_name:
                 return hub
@@ -144,6 +148,7 @@ class Map():
                 else:
                     raise ValueError("Missing data connection")
                 continue
+        n_map.start.nb_drone = n_map.nb_drone
         return n_map
 
     def set_neighbor(self) -> None:
@@ -158,6 +163,15 @@ class Map():
                     hub.append_neighbor(hub_2)
                 elif hub.name == hub_2.name:
                     hub.append_neighbor(hub_1)
+
+    def give_adjacent_lst(self) -> Dict:
+        """ Retrun list of neibor and this weight """
+        adj = dict()
+        adj.update({self.start.name: self.start.neighbors})
+        for hub in self.hub_lst:
+            adj.update({hub.name: hub.neighbors})
+        adj.update({self.end.name: self.end.neighbors})
+        return adj
 
     def gen_drone(self) -> None:
         """ gen drone list """
@@ -184,5 +198,7 @@ class Map():
         for drone in self.drone_lst:
             drone.nb_move += 1
             if drone.nb_move >= drone.len_path:
+                drone.c_hub.nb_drone -= 1
+                drone.n_hub.nb_drone += 1
                 drone.c_hub = drone.n_hub
                 drone.n_hub = None

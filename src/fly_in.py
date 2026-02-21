@@ -1,5 +1,7 @@
 from .parser import get_data, check_data
 from .Map import Map
+from .Pathfinder import Pathinder
+from typing import Any
 import sys
 
 
@@ -26,7 +28,12 @@ def debug_info_map(map: Map) -> None:
         print(f"  - connection: {connection} -> [{connection.c_setting}]")
 
 
+def debug_lst(lst: Any) -> None:
+    print(f"{[elem.name for elem in lst]}")
+
+
 def main():
+
     path = "data/maps/easy/01_linear_path.txt"
     # path = "data/maps/hard/01_maze_nightmare.txt"
     # path = "data/maps/hard/02_capacity_hell.txt"
@@ -34,31 +41,29 @@ def main():
         map_data = get_data(path)
         check_data(map_data)
         map = Map.map_init(map_data)
-    except FileNotFoundError as e:
+    except Exception as e:
         print("Invalid map file format")
         print(e)
         sys.exit()
 
-    # debug_info_map(map)
-
     map.set_neighbor()
-    # print("Start connection: "
-    #       f"{[neighbors.name for neighbors in map.start.neighbors]}")
-    # for hub in map.hub_lst:
-    #     print(f"{hub.name}: "
-    #           f"{[neighbors.name for neighbors in hub.neighbors]}")
-    # print("End connection: "
-    #       f"{[neighbors.name for neighbors in map.end.neighbors]}")
 
-    map.gen_drone()
-    map.set_target_drone(map.drone_lst[0], map.get_hub('waypoint1'))
-    map.set_target_drone(map.drone_lst[1], map.get_hub('waypoint1'))
+    # map.gen_drone()
+    # for drone in map.drone_lst:
+    #     map.set_target_drone(drone, map.get_hub('gate1'))
 
-    map.move_drone()
+    # print(f"drone in hub: {map.get_hub('start').nb_drone}")
+    # debug_lst(map.drone_lst)
+    # map.move_drone()
+    # for drone in map.drone_lst:
+    #     if drone.c_hub.name == "gate1":
+    #         print(drone.name)
+    # print(f"drone in hub: {map.get_hub('start').nb_drone}")
 
-    for drone in map.drone_lst:
-        if drone.c_hub.name == "waypoint1":
-            print(drone.name)
+    path_find = Pathinder(map)
+    path = path_find.get_path()
+    for i, hub in enumerate(path):
+        print(f"{i}: {hub.name}")
 
 
 if __name__ == "__main__":

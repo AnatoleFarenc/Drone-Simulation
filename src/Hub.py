@@ -7,6 +7,8 @@ class Hub():
         """ Init Hub parameters """
         self.__c_setting: Dict[Any, Any] = {}
         self.__neighbors: List["Hub"] = []
+        self.__nb_drone: int = 0
+        self.__weight: int = 1
 
         self.name = name
         self.pos = pos
@@ -65,3 +67,23 @@ class Hub():
     def append_neighbor(self, neighbor: "Hub") -> None:
         """ Append hub in neighbors list """
         self.__neighbors.append(neighbor)
+
+    @property
+    def nb_drone(self) -> int:
+        """ Return nb drone in hub """
+        return self.__nb_drone
+
+    @nb_drone.setter
+    def nb_drone(self, nb_drone) -> None:
+        """ Set nb dorne in hub """
+        self.__nb_drone = nb_drone
+
+    @property
+    def weight(self) -> int:
+        """ Return weight of hub """
+        return self.__weight
+
+    @weight.setter
+    def weight(self, weight: int) -> None:
+        """ Set weight """
+        self.__weight = weight
