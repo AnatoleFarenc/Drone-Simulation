@@ -164,13 +164,15 @@ class Map():
                 elif hub.name == hub_2.name:
                     hub.append_neighbor(hub_1)
 
-    def give_adjacent_lst(self) -> Dict:
+    def give_adjacent_lst(self, hub_lst: List[Hub]) -> Dict:
         """ Retrun list of neibor and this weight """
         adj = dict()
-        adj.update({self.start.name: self.start.neighbors})
-        for hub in self.hub_lst:
-            adj.update({hub.name: hub.neighbors})
-        adj.update({self.end.name: self.end.neighbors})
+        # adj.update({self.start.name: self.start.neighbors})
+        for hub in hub_lst:
+            if hub.is_visible or hub == hub_lst[0]:
+                neighbors = [n for n in hub.neighbors if n in hub_lst]
+                adj.update({hub.name: neighbors})
+        # adj.update({self.end.name: self.end.neighbors})
         return adj
 
     def gen_drone(self) -> None:
@@ -182,7 +184,6 @@ class Map():
     def set_target_drone(self, drone: Drone, target: Hub) -> None:
         """ Set drone to the next hub [target] """
         if drone.c_hub not in target.neighbors:
-            print([n.name for n in target.neighbors])
             raise ValueError("Error: target isn't attainable")
 
         if target.c_setting.get('zone'):
@@ -197,8 +198,28 @@ class Map():
     def move_drone(self) -> None:
         """ Move drones """
         for drone in self.drone_lst:
-            drone.nb_move += 1
-            if drone.nb_move >= drone.len_path:
-                drone.c_hub.nb_drone -= 1
-                drone.n_hub.nb_drone += 1
-                drone.c_hub = drone.n_hub
+            if not drone.stay:
+                drone.nb_move += 1
+                if drone.nb_move >= drone.len_path:
+                    drone.c_hub.nb_drone -= 1
+                    drone.n_hub.nb_drone += 1
+                    drone.c_hub = drone.n_hub
+
+    def update_wheight(self) -> None:
+        hub_lst = self.hub_lst
+        for hub in hub_lst:
+            if hub.c_setting.get("zone"):
+                if hub.c_setting['zone'] == 'blocked':
+                    hub.is_visible = False
+                    continue
+            if hub.c_setting.get("max_drones"):
+                max_drone = int(hub.c_setting["max_drones"])
+                nb_drone = sum(1 for drone in self.drone_lst
+                               if drone.n_hub.name == hub.name)
+                if nb_drone > max_drone:
+                    raise ValueError(f"Error: {hub.name} "
+                                     f"{nb_drone}/{max_drone}")
+                if nb_drone == max_drone:
+                    hub.is_visible = False
+                else:
+                    hub.is_visible = True

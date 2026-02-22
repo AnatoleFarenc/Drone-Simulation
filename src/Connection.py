@@ -7,6 +7,7 @@ class Connection():
                  complementary_setting: Dict = {}) -> None:
         self.hubs = hubs
         self.c_setting = complementary_setting
+        self.__is_visible = True
 
     @property
     def hubs(self) -> Tuple[Hub, Hub]:
@@ -27,6 +28,16 @@ class Connection():
     def c_setting(self, complementary_setting: Dict) -> None:
         """ Set complementary setting """
         self.__c_setting = complementary_setting
+
+    @property
+    def is_visible(self) -> bool:
+        """ Return if the connection is visble """
+        return self.__is_visible
+
+    @is_visible.setter
+    def is_visible(self, is_visible: bool) -> None:
+        """ Set connection visibility """
+        self.__is_visible = is_visible
 
     def __str__(self) -> str:
         return f"{self.hubs[0].name}-{self.hubs[1].name}"

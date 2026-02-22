@@ -9,6 +9,7 @@ class Hub():
         self.__neighbors: List["Hub"] = []
         self.__nb_drone: int = 0
         self.__weight: int = 1
+        self.__is_visible = True
 
         self.name = name
         self.pos = pos
@@ -87,3 +88,13 @@ class Hub():
     def weight(self, weight: int) -> None:
         """ Set weight """
         self.__weight = weight
+
+    @property
+    def is_visible(self) -> bool:
+        """ Return if the hub is visble """
+        return self.__is_visible
+
+    @is_visible.setter
+    def is_visible(self, is_visible: bool) -> None:
+        """ Set hub visibility """
+        self.__is_visible = is_visible

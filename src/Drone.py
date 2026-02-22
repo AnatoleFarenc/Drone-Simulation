@@ -9,6 +9,8 @@ class Drone():
         self.n_hub = c_hub
         self.len_path = 1
         self.nb_move = 0
+        self.__stay = False
+        self.__path = []
 
     @property
     def name(self) -> str:
@@ -62,3 +64,23 @@ class Drone():
     def nb_move(self, move) -> None:
         """ Set move to nb_move """
         self.__nb_move = move
+
+    @property
+    def stay(self) -> bool:
+        """ Return if the drone stay or not """
+        return self.__stay
+
+    @stay.setter
+    def stay(self, stay) -> None:
+        """ Set if the drone stay or not """
+        self.__stay = stay
+
+    @property
+    def path(self) -> bool:
+        """ Return path to goal """
+        return self.__path
+
+    @path.setter
+    def path(self, path) -> None:
+        """ Set paht to goal """
+        self.__path = path

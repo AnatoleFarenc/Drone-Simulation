@@ -34,9 +34,10 @@ def debug_lst(lst: Any) -> None:
 
 def main():
 
-    path = "data/maps/easy/01_linear_path.txt"
+    # path = "data/maps/easy/01_linear_path.txt"
+    # path = "data/maps/medium/01_dead_end_trap.txt"
     # path = "data/maps/hard/01_maze_nightmare.txt"
-    # path = "data/maps/hard/02_capacity_hell.txt"
+    path = "data/maps/hard/02_capacity_hell.txt"
     try:
         map_data = get_data(path)
         check_data(map_data)
@@ -51,16 +52,21 @@ def main():
     end = False
     find_path = Pathinder(map)
     map.gen_drone()
-    i = 1
     while not end:
         for drone in map.drone_lst:
-            path = find_path.get_path()
-            map.set_target_drone(drone, path[i])
-            print(f"{drone.name} go to {drone.n_hub.name}")
+            map.update_wheight()
+            drone.path = find_path.get_path(drone.c_hub)
+            if drone.path:
+                map.set_target_drone(drone, drone.path.pop(0))
+                print(f"{drone.name} go to {drone.n_hub.name}")
+            else:
+                print(f"{drone.name} stay put")
+        print()
         map.move_drone()
-        i += 1
         if map.end.nb_drone == map.nb_drone:
             end = True
+    print()
+    print(f"{map.end.nb_drone}/{map.nb_drone} drone in {map.end.name}")
 
 
 if __name__ == "__main__":
