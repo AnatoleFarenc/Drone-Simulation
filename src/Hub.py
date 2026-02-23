@@ -8,12 +8,20 @@ class Hub():
         self.__c_setting: Dict[Any, Any] = {}
         self.__neighbors: List["Hub"] = []
         self.__nb_drone: int = 0
+        self.__max_drone: int = 1
         self.__weight: int = 1
         self.__is_visible = True
+        self.__is_blocked = False
 
         self.name = name
         self.pos = pos
         self.c_setting = complementary_setting
+
+        if self.c_setting.get("max_drones"):
+            self.max_drone = int(self.c_setting["max_drones"])
+        else:
+            if self.name == "start" or self.name == "goal":
+                self.max_drone = self.nb_drone
 
     @property
     def name(self) -> str:
@@ -98,3 +106,23 @@ class Hub():
     def is_visible(self, is_visible: bool) -> None:
         """ Set hub visibility """
         self.__is_visible = is_visible
+
+    @property
+    def is_blocked(self) -> bool:
+        """ Return if the hub is blocked """
+        return self.__is_blocked
+
+    @is_blocked.setter
+    def is_blocked(self, is_blocked: bool) -> None:
+        """ Set hub blocked """
+        self.__is_blocked = is_blocked
+
+    @property
+    def max_drone(self) -> bool:
+        """ Return max drone capacity """
+        return self.__max_drone
+
+    @max_drone.setter
+    def max_drone(self, max_drone: bool) -> None:
+        """ Set max_drone capacity """
+        self.__max_drone = max_drone
