@@ -149,6 +149,7 @@ class Map():
                     raise ValueError("Missing data connection")
                 continue
         n_map.start.nb_drone = n_map.nb_drone
+        n_map.set_neighbor()
         return n_map
 
     def set_neighbor(self) -> None:

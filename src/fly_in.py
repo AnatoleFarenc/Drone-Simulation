@@ -48,7 +48,7 @@ def main():
         print(e)
         sys.exit()
 
-    map.set_neighbor()
+    # map.set_neighbor()
 
     end = False
     nb_turn = 0
