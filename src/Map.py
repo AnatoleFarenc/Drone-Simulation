@@ -150,6 +150,7 @@ class Map():
                 continue
         n_map.start.nb_drone = n_map.nb_drone
         n_map.set_neighbor()
+        n_map.gen_drone()
         return n_map
 
     def set_neighbor(self) -> None:
