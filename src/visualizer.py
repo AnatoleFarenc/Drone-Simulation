@@ -1,5 +1,6 @@
 from .Map import Map
 from .Pathfinder import Pathinder
+import time
 
 
 def debug_info_map(map: Map) -> None:
@@ -27,23 +28,30 @@ def debug_info_map(map: Map) -> None:
 
 def play_simulation(map: Map) -> None:
     pf = Pathinder(map)
-    nb_turn = 0
+    nb_turn = 1
     while map.end.nb_drone < map.nb_drone:
-        nb_turn += 1
         print(f"Turn: {nb_turn}")
         for drone in map.drone_lst:
             map.update_wheight()
             drone.path = pf.get_path(drone.c_hub)
             if drone.path:
-                map.set_target_drone(drone, drone.path.pop(0))
-                if not drone.stay:
-                    print(f"{drone.name} go to {drone.n_hub.name}")
+                if map.set_target_drone(drone, drone.path.pop(0)):
+                    if not drone.stay:
+                        print(f"{drone.name}-{drone.n_hub.name}", end=' ')
+                    else:
+                        ...
+                        # print(f"{drone.name}-stayPut", end=' ')
                 else:
-                    print(f"{drone.name} stay put")
+                    print(f"{drone.name}>"
+                          f"{drone.c_hub.name}-{drone.n_hub.name}", end=' ')
             else:
-                print("No path find: ", end='')
-                print(f"{drone.name} stay put")
-        print()
+                # print("No path find: ", end='')
+                # print(f"{drone.name} stay put")
+                ...
+            # time.sleep(0.1)
+        print('\n')
+        map.clean_connection()
+        nb_turn += 1
 
     print()
     print(f"{map.end.nb_drone}/{map.nb_drone} drone in {map.end.name}")

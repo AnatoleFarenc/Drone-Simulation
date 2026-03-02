@@ -8,6 +8,8 @@ class Connection():
         self.hubs = hubs
         self.c_setting = complementary_setting
         self.__is_visible = True
+        self.capacity = 0
+        self.m_capacity = 1
 
     @property
     def hubs(self) -> Tuple[Hub, Hub]:
@@ -38,6 +40,26 @@ class Connection():
     def is_visible(self, is_visible: bool) -> None:
         """ Set connection visibility """
         self.__is_visible = is_visible
+
+    @property
+    def capacity(self) -> int:
+        """ Return current number of drone in link """
+        return self.__capacity
+
+    @capacity.setter
+    def capacity(self, nb_drone) -> None:
+        """ Update the number of drone in link """
+        self.__capacity = nb_drone
+
+    @property
+    def m_capacity(self) -> int:
+        """ Return number of max drone in link """
+        return self.__m_capacity
+
+    @m_capacity.setter
+    def m_capacity(self, nb_drone) -> None:
+        """ Update the number of max drone in link """
+        self.__m_capacity = nb_drone
 
     def __str__(self) -> str:
         return f"{self.hubs[0].name}-{self.hubs[1].name}"

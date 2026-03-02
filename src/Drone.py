@@ -1,4 +1,5 @@
 from .Hub import Hub
+from .Connection import Connection
 
 
 class Drone():
@@ -11,6 +12,7 @@ class Drone():
         self.nb_move = 0
         self.__stay = False
         self.__path = []
+        self.con = None
 
     @property
     def name(self) -> str:
@@ -84,3 +86,13 @@ class Drone():
     def path(self, path) -> None:
         """ Set paht to goal """
         self.__path = path
+
+    @property
+    def con(self) -> Connection:
+        """ Return con"""
+        return self.__con
+
+    @con.setter
+    def con(self, con) -> None:
+        """ Set new """
+        self.__con = con
