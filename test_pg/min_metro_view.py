@@ -3,7 +3,7 @@ import math
 
 pygame.init()
 WINDOW_SIZE = (1000, 700)
-SCALE = 5  # facteur pour agrandir la surface temporaire
+SCALE = 3  # facteur pour agrandir la surface temporaire
 LARGE_SIZE = (WINDOW_SIZE[0]*SCALE, WINDOW_SIZE[1]*SCALE)
 
 screen = pygame.display.set_mode(WINDOW_SIZE)

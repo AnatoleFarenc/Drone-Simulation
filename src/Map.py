@@ -2,6 +2,7 @@ from typing import List, Self, LiteralString, Dict
 from src.Hub import Hub
 from src.Connection import Connection
 from src.Drone import Drone
+from src.config import W_SIZE, OFFSET_EDGE
 import re
 
 
@@ -13,6 +14,7 @@ class Map():
         self.__hub_lst = []
         self.__connection_lst = []
         self.__drone_lst = []
+        self.__project_pos = dict()
 
     @property
     def nb_drone(self) -> int:
@@ -91,6 +93,16 @@ class Map():
         """ Return Drone list """
         return self.__drone_lst
 
+    @property
+    def project_pos(self) -> Dict:
+        """ Return project hub coordinates """
+        return self.__project_pos
+
+    @project_pos.setter
+    def project_pos(self, p_pos: Dict) -> None:
+        """ Set projet pos list """
+        self.__project_pos = p_pos
+
     @staticmethod
     def parse_complementary_data(data: str) -> Dict:
         """ Parse they complementary data and return dict with same """
@@ -104,6 +116,33 @@ class Map():
             key, value = elem.split('=')
             data_dict.update({key: value})
         return data_dict
+
+    def get_project_hub_coordinate(self) -> None:
+        """ Return one list of project coordinate to display on surface """
+        hub_lst = [self.start] + self.hub_lst.copy() + [self.end]
+        x_min = min(hub.pos[0] for hub in hub_lst)
+        x_max = max(hub.pos[0] for hub in hub_lst)
+        y_min = min(hub.pos[1] for hub in hub_lst)
+        y_max = max(hub.pos[1] for hub in hub_lst)
+        width, height = W_SIZE
+
+        x_center = (x_min + x_max) / 2
+        y_center = (y_min + y_max) / 2
+        hubs_width = max(1, x_max - x_min)
+        hubs_height = max(1, y_max - y_min)
+        # distance of hub in surface (add offset_edge to not touch edge)
+        scale = OFFSET_EDGE * min(width / hubs_width, height / hubs_height)
+
+        # create project pos
+        self.project_pos = {}
+        for hub in hub_lst:
+            x, y = hub.pos
+
+            x -= x_center
+            y -= y_center
+            x_p = width/2 + x * scale
+            y_p = height/2 - y * scale
+            self.project_pos.update({hub.name: (x_p, y_p)})
 
     @classmethod
     def map_init(cls, data: dict) -> Self:
@@ -151,6 +190,7 @@ class Map():
         n_map.start.nb_drone = n_map.nb_drone
         n_map.set_neighbor()
         n_map.gen_drone()
+        n_map.get_project_hub_coordinate()
         return n_map
 
     def set_neighbor(self) -> None:

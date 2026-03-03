@@ -1,0 +1,13 @@
+
+W_SIZE = (1920, 1080)
+SCALE = 3
+L_SIZE = (W_SIZE[0] * SCALE, W_SIZE[1] * SCALE)
+H_SIZE = 30
+OFFSET_EDGE = 0.9
+
+# color
+BG_C = (30, 30, 40)
+LINE_C = (90, 90, 110)
+GOAL_C = (80, 220, 120)
+HUB_C = (80, 140, 255)
+START_C = (240, 80, 80)
