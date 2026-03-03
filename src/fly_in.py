@@ -1,7 +1,9 @@
 from src.parser import get_data, check_data
 from src.Map import Map
-import src.visualizer as view
+from src.Renderer import Renderer
+from src import pg
 import sys
+from src import W_SIZE
 
 
 def main():
@@ -26,11 +28,24 @@ def main():
         print(e)
         sys.exit()
 
-    end = False
-    while not end:
-        view.play_simulation(map)
-        end = True
+    pg.init()
 
+    window = pg.display.set_mode(W_SIZE)
+    pg.display.set_caption("FLY IN")
+    clock = pg.time.Clock()
+    is_open = True
+
+    while is_open:
+        dt = clock.tick(60) / 1000
+
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                is_open = False
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    is_open = False
+
+    pg.quit()
 
 if __name__ == "__main__":
     main()

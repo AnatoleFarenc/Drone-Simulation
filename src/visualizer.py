@@ -1,6 +1,5 @@
 from .Map import Map
 from .Pathfinder import Pathinder
-import time
 
 
 def debug_info_map(map: Map) -> None:
