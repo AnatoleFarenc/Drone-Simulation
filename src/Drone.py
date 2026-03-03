@@ -1,5 +1,6 @@
 from .Hub import Hub
 from .Connection import Connection
+from typing import List
 
 
 class Drone():
@@ -13,6 +14,9 @@ class Drone():
         self.__stay = False
         self.__path = []
         self.con = None
+        self.proj_pos = [0, 0]
+        self.start_pos = [0, 0]
+        self.end_pos = [0, 0]
 
     @property
     def name(self) -> str:
@@ -96,3 +100,13 @@ class Drone():
     def con(self, con) -> None:
         """ Set new """
         self.__con = con
+
+    @property
+    def display_pos(self) -> List:
+        """ Return display_pos"""
+        return self.__display_pos
+
+    @display_pos.setter
+    def display_pos(self, display_pos: List) -> None:
+        """ Set new display pos """
+        self.__display_pos = display_pos

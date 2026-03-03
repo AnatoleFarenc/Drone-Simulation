@@ -95,6 +95,6 @@ while running:
 
     # 5️⃣ Afficher
     screen.blit(small_surface, (0, 0))
-    pygame.display.flip()
+        pygame.display.flip()
 
 pygame.quit()

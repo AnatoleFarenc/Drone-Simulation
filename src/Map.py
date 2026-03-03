@@ -250,7 +250,7 @@ class Map():
         if con.capacity >= con.m_capacity:
             con.capacity += 1
             drone.stay = True
-            print("drone stay put", end=' ')
+            # print("drone stay put", end=' ')
             return
         con.capacity += 1
         if con.capacity >= con.m_capacity:
