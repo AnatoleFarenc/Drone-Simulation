@@ -6,7 +6,7 @@ from src import pg
 # import sys
 import math
 from src.config import W_SIZE
-from src.visualizer import play_simulation
+
 
 def main():
 
@@ -16,9 +16,9 @@ def main():
     # path = "data/maps/medium/01_dead_end_trap.txt"
     # path = "data/maps/medium/02_circular_loop.txt"
     # path = "data/maps/medium/03_priority_puzzle.txt"
-    # path = "data/maps/hard/01_maze_nightmare.txt"
+    path = "data/maps/hard/01_maze_nightmare.txt"
     # path = "data/maps/hard/02_capacity_hell.txt"
-    path = "data/maps/hard/03_ultimate_challenge.txt"
+    # path = "data/maps/hard/03_ultimate_challenge.txt"
     # path = "data/maps/test.txt"
     # path = "data/maps/challenger/01_the_impossible_dream.txt"
 
@@ -80,22 +80,31 @@ def main():
 
             for drone in map.drone_lst:
                 map.update_wheight()
-                drone.path = pf.get_path(drone.c_hub)
-
+                drone.path = pf.get_path_for_drone(drone)
                 if drone.path:
                     if map.set_target_drone(drone, drone.path.pop(0)):
                         if not drone.stay:
                             print(f"{drone.name}-{drone.n_hub.name}", end=' ')
                             drone.start_pos = drone.proj_pos[:]
-                            n_h = drone.n_hub.name
-                            drone.end_pos = map.project_pos[n_h][:]
+                            n_h_name = drone.n_hub.name
+                            drone.end_pos = map.project_pos[n_h_name][:]
                             move_drone.append(drone)
+                    else:
+                        print(f"{drone.name}-{drone.c_hub.name}-"
+                              f"{drone.n_hub.name}", end=' ')
+                        # drone.start_pos = drone.proj_pos[:]
+                        # n_h_pos = map.project_pos[drone.n_hub.name][:]
+                        # mid_con_pos = tuple(coordinate / 2 
+                        #                     for coordinate in n_h_pos)
+                        # drone.end_pos = mid_con_pos
+                        # move_drone.append(drone)
 
             print('\n')
             map.clean_connection()
 
             if map.nb_drone == map.end.nb_drone:
                 print()
+                print(f"Total turn : {nb_turn}")
                 print(f"{map.end.nb_drone}/{map.nb_drone} drone "
                       f"in {map.end.name}")
                 # is_open = False

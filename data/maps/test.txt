@@ -1,15 +1,60 @@
-nb_drones: 3
+nb_drones: 12
 
-start_hub: start 0 0
-end_hub: goal 10 10
-hub: g1 1 0 [max_drones=10 zone=restricted]
-hub: gt 1 0
-hub: g2 0 2 [max_drones=10]
-hub: g3 0 3 [max_drones=1]
+start_hub: start 0 0 [color=green max_drones=12]
 
-connection: start-g1
-connection: g1-g2 [max_link_capacity=10]
-connection: g2-gt
-connection: gt-g1
-connection: g2-g3 [max_link_capacity=1]
-connection: g3-goal
+# Layer 1: Initial split
+hub: split1 1 0 [color=orange max_drones=3]
+hub: split2 1 1 [color=orange max_drones=2]
+
+# Layer 2: Fast illusion paths (low capacity)
+hub: normal1 2 0 [color=blue max_drones=1]
+hub: normal2 3 0 [color=blue max_drones=1]
+hub: priority1 2 1 [zone=priority color=cyan max_drones=3]
+hub: priority2 3 1 [zone=priority color=cyan max_drones=2]
+hub: priority_trap 4 1 [color=red max_drones=1]
+
+# Layer 3: Restricted highway (wide, scalable)
+hub: res1 2 -1 [zone=restricted color=purple max_drones=5]
+hub: res2 3 -1 [zone=restricted color=purple max_drones=5]
+hub: res3 4 -1 [zone=restricted color=purple max_drones=5]
+
+# Layer 4: Merge area with bottleneck
+hub: merge1 5 0 [color=yellow max_drones=4]
+hub: merge2 5 -1 [color=yellow max_drones=6]
+
+# Layer 5: Final section
+hub: final1 6 0 [color=orange max_drones=5]
+hub: final2 7 0 [color=orange max_drones=5]
+
+end_hub: goal 8 0 [color=gold max_drones=12]
+
+# Connections
+
+# Initial split
+connection: start-split1
+connection: start-split2
+
+# Fast illusion paths
+connection: split1-normal1
+connection: normal1-normal2
+connection: normal2-merge1
+connection: split1-priority1
+connection: priority1-priority2
+connection: priority2-priority_trap
+connection: priority_trap-merge1
+
+# Restricted highway
+connection: split2-res1
+connection: res1-res2
+connection: res2-res3
+connection: res3-merge2
+
+# Merge to final
+connection: merge1-final1
+connection: merge2-final2
+connection: final1-final2
+connection: final2-goal
+
+# Optional waiting bypass (very limited)
+connection: priority2-res2
+connection: normal2-res1
