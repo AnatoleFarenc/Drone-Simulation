@@ -10,13 +10,13 @@ from src.config import W_SIZE
 
 def main():
 
-    # path = "data/maps/easy/01_linear_path.txt"
+    path = "data/maps/easy/01_linear_path.txt"
     # path = "data/maps/easy/02_simple_fork.txt"
     # path = "data/maps/easy/03_basic_capacity.txt"
     # path = "data/maps/medium/01_dead_end_trap.txt"
     # path = "data/maps/medium/02_circular_loop.txt"
     # path = "data/maps/medium/03_priority_puzzle.txt"
-    path = "data/maps/hard/01_maze_nightmare.txt"
+    # path = "data/maps/hard/01_maze_nightmare.txt"
     # path = "data/maps/hard/02_capacity_hell.txt"
     # path = "data/maps/hard/03_ultimate_challenge.txt"
     # path = "data/maps/test.txt"
@@ -82,23 +82,20 @@ def main():
                 map.update_wheight()
                 drone.path = pf.get_path_for_drone(drone)
                 if drone.path:
-                    if map.set_target_drone(drone, drone.path.pop(0)):
-                        if not drone.stay:
+                    map.set_target_drone(drone, drone.path.pop(0))
+                    if not drone.stay:
+                        drone.start_pos = drone.proj_pos[:]
+                        if drone.nb_move >= drone.len_path:
                             print(f"{drone.name}-{drone.n_hub.name}", end=' ')
-                            drone.start_pos = drone.proj_pos[:]
                             n_h_name = drone.n_hub.name
                             drone.end_pos = map.project_pos[n_h_name][:]
-                            move_drone.append(drone)
-                    else:
-                        print(f"{drone.name}-{drone.c_hub.name}-"
-                              f"{drone.n_hub.name}", end=' ')
-                        # drone.start_pos = drone.proj_pos[:]
-                        # n_h_pos = map.project_pos[drone.n_hub.name][:]
-                        # mid_con_pos = tuple(coordinate / 2 
-                        #                     for coordinate in n_h_pos)
-                        # drone.end_pos = mid_con_pos
-                        # move_drone.append(drone)
-
+                        else:
+                            print(f"{drone.name}-{drone.c_hub.name}-"
+                            f"{drone.n_hub.name}", end=' ')
+                            x1, y1 = drone.start_pos[:]
+                            x2, y2 = map.project_pos[drone.n_hub.name]
+                            drone.end_pos = ((x1 + x2) / 2, (y1 + y2) / 2)
+                        move_drone.append(drone)
             print('\n')
             map.clean_connection()
 

@@ -1,4 +1,4 @@
-from typing import List, Self, LiteralString, Dict
+from typing import List, Self, Dict
 from src.Hub import Hub
 from src.Connection import Connection
 from src.Drone import Drone
@@ -74,12 +74,10 @@ class Map():
         """ Return connection list """
         return self.__connection_lst
 
-    def append_connection(self, name: LiteralString, c_data: Dict) -> None:
+    def append_connection(self, name: str, c_data: Dict) -> None:
         """ Append connection """
         enter, exit = name.split('-', 1)
-        hub_lst = self.hub_lst.copy()
-        hub_lst.append(self.start)
-        hub_lst.append(self.end)
+        hub_lst = self.hub_lst.copy() + [self.start, self.end]
         hub_0 = [hub for hub in hub_lst if hub.name == enter]
         hub_1 = [hub for hub in hub_lst if hub.name == exit]
         if hub_0 and hub_1:
@@ -170,9 +168,9 @@ class Map():
                     raise ValueError(f"Error: Inalid coordinate:\n"
                                      f"{name} ({x}, {y})")
                 c_setting = n_map.parse_complementary_data(c_data)
-                if name == "start":
+                if  "start" in name:
                     n_map.start = Hub(name, (x, y), c_setting)
-                elif name == "goal":
+                elif "goal" in name:
                     n_map.end = Hub(name, (x, y), c_setting)
                 else:
                     n_map.append_hub(Hub(name, (x, y), c_setting))
@@ -228,14 +226,15 @@ class Map():
             if (h1.name == h_n1 and h2.name == h_n2 or
                h1.name == h_n2 and h2.name == h_n1):
                 return con
-        raise ValueError("Error connection does not exist")
+        raise ValueError("Error connection does not exist: "
+                         f"{h_n1}-{h_n2}")
 
     def clean_connection(self) -> None:
         """ Clean number of drone in connection after same loop """
         for con in self.connection_lst:
             con.capacity = 0
 
-    def set_target_drone(self, drone: Drone, target: Hub) -> bool:
+    def set_target_drone(self, drone: Drone, target: Hub) -> True:
         """ Set drone to the next hub [target] """
         if drone.c_hub not in target.neighbors:
             raise ValueError("Error: target isn't attainable "
@@ -279,6 +278,9 @@ class Map():
             drone.stay = True
 
         return True
+        
+            
+
 
     def update_wheight(self) -> None:
         hub_lst = self.hub_lst
