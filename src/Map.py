@@ -168,7 +168,7 @@ class Map():
                     raise ValueError(f"Error: Inalid coordinate:\n"
                                      f"{name} ({x}, {y})")
                 c_setting = n_map.parse_complementary_data(c_data)
-                if  "start" in name:
+                if "start" in name:
                     n_map.start = Hub(name, (x, y), c_setting)
                 elif "goal" in name:
                     n_map.end = Hub(name, (x, y), c_setting)
@@ -234,53 +234,47 @@ class Map():
         for con in self.connection_lst:
             con.capacity = 0
 
-    def set_target_drone(self, drone: Drone, target: Hub) -> True:
-        """ Set drone to the next hub [target] """
-        if drone.c_hub not in target.neighbors:
-            raise ValueError("Error: target isn't attainable "
-                             f"{drone.c_hub.name}")
+    # def set_target_drone(self, drone: Drone, target: Hub) -> None:
+    #     """ Set drone to the next hub [target] """
+    #     if drone.c_hub not in target.neighbors:
+    #         raise ValueError("Error: target isn't attainable "
+    #                          f"{drone.c_hub.name}")
 
-        if drone.nb_move < drone.len_path and drone.nb_move > 0:
-            drone.nb_move += 1
-            drone.stay = True
-            return False
+    #     if drone.nb_move < drone.len_path and drone.nb_move > 0:
+    #         drone.nb_move += 1
+    #         drone.stay = True
+    #         return False
 
-        drone.n_hub = target
+    #     drone.n_hub = target
 
-        con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
-        if con.capacity >= con.m_capacity:
-            con.capacity += 1
-            drone.stay = True
-            # print("drone stay put", end=' ')
-            return
-        con.capacity += 1
-        if con.capacity >= con.m_capacity:
-            drone.c_hub.weight += 2
+    #     con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
+    #     if con.capacity >= con.m_capacity:
+    #         con.capacity += 1
+    #         drone.stay = True
+    #         return
+    #     con.capacity += 1
+    #     if con.capacity >= con.m_capacity:
+    #         drone.c_hub.weight += 2
 
-        if target.c_setting.get('zone'):
-            if target.c_setting['zone'] == 'restricted':
-                drone.len_path = 2
-        else:
-            drone.len_path = 1
+    #     if target.c_setting.get('zone'):
+    #         if target.c_setting['zone'] == 'restricted':
+    #             drone.len_path = 2
+    #     else:
+    #         drone.len_path = 1
 
-        drone.nb_move = 0
+    #     drone.nb_move = 0
 
-        if not drone.n_hub.is_blocked:
-            drone.c_hub.nb_drone -= 1
-            drone.n_hub.nb_drone += 1
-            drone.c_hub.is_blocked = False
-            drone.stay = False
-            drone.c_hub = drone.n_hub
-            if drone.n_hub.nb_drone == drone.n_hub.max_drone:
-                drone.n_hub.is_blocked = True
-            drone.nb_move += 1
-        else:
-            drone.stay = True
-
-        return True
-        
-            
-
+    #     if not drone.n_hub.is_blocked:
+    #         drone.c_hub.nb_drone -= 1
+    #         drone.n_hub.nb_drone += 1
+    #         drone.c_hub.is_blocked = False
+    #         drone.stay = False
+    #         drone.c_hub = drone.n_hub
+    #         if drone.n_hub.nb_drone == drone.n_hub.max_drone:
+    #             drone.n_hub.is_blocked = True
+    #         drone.nb_move += 1
+    #     else:
+    #         drone.stay = True
 
     def update_wheight(self) -> None:
         hub_lst = self.hub_lst
@@ -306,3 +300,56 @@ class Map():
             #     hub.weight += 2
             # elif hub.weight > 1:
             #     hub.weight -= 1
+
+    def set_target(self, drone: Drone, target: Hub) -> None:
+        """ Set target to the drone """
+
+        drone.n_hub = target
+
+        if drone.nb_step < drone.len_path and drone.nb_step > 0:
+            return
+
+        con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
+        # if con.capacity > con.m_capacity:
+        #     drone.stay = True
+        #     return
+        # if con.capacity == con.m_capacity:
+        #     drone.c_hub.weight += 2
+
+        if target.c_setting.get("zone") == "restricted":
+            drone.len_path = 2
+        else:
+            drone.len_path = 1
+
+        if (target.nb_drone >= target.max_drone or
+                con.capacity >= con.m_capacity):
+            drone.stay = True
+            drone.n_hub.weight += 2
+        else:
+            con.capacity += 1
+            drone.n_hub.nb_drone += 1
+            drone.c_hub.nb_drone -= 1
+            drone.stay = False
+
+    def move_drone(self, drone: Drone) -> None:
+        """ Move the drone to the next destionation """
+        if drone.stay:
+            return
+        drone.nb_step += 1
+        if drone.nb_step >= drone.len_path:
+            print(f"{drone.name}-{drone.n_hub.name}", end=' ')
+            print()
+            con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
+            con.capacity = 0
+            drone.c_hub = drone.n_hub
+            drone.nb_step = 0
+
+            n_h_name = drone.n_hub.name
+            drone.end_pos = self.project_pos[n_h_name][:]
+        else:
+            print(f"{drone.name}-{drone.c_hub.name}-"
+                  f"{drone.n_hub.name}", end=' ')
+            print()
+            x1, y1 = self.project_pos[drone.c_hub.name]
+            x2, y2 = self.project_pos[drone.n_hub.name]
+            drone.end_pos = ((x1 + x2) / 2, (y1 + y2) / 2)

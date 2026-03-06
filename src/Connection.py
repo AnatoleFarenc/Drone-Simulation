@@ -11,6 +11,16 @@ class Connection():
         self.capacity = 0
         self.m_capacity = 1
 
+        if self.c_setting.get('max_link_capacity'):
+            value = self.c_setting.get('max_link_capacity')
+            try:
+                value = int(value)
+            except ValueError:
+                raise ValueError(f"error: invalid value {value}")
+            if value < 0:
+                raise ValueError(f"error: invalid value {value}")
+            self.m_capacity = value
+
     @property
     def hubs(self) -> Tuple[Hub, Hub]:
         """ Return tuple of hubs name connection """

@@ -1,4 +1,5 @@
 from typing import Tuple, Dict, List, Any
+from math import inf
 
 
 class Hub():
@@ -21,7 +22,7 @@ class Hub():
             self.max_drone = int(self.c_setting["max_drones"])
         else:
             if self.name == "start" or self.name == "goal":
-                self.max_drone = self.nb_drone
+                self.max_drone = inf
 
     @property
     def name(self) -> str:

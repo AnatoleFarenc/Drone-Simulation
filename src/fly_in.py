@@ -3,14 +3,14 @@ from src.Map import Map
 from src.Renderer import Renderer
 from src.Pathfinder import Pathinder
 from src import pg
-# import sys
+import sys
 import math
 from src.config import W_SIZE
 
 
 def main():
 
-    path = "data/maps/easy/01_linear_path.txt"
+    # path = "data/maps/easy/01_linear_path.txt"
     # path = "data/maps/easy/02_simple_fork.txt"
     # path = "data/maps/easy/03_basic_capacity.txt"
     # path = "data/maps/medium/01_dead_end_trap.txt"
@@ -20,16 +20,27 @@ def main():
     # path = "data/maps/hard/02_capacity_hell.txt"
     # path = "data/maps/hard/03_ultimate_challenge.txt"
     # path = "data/maps/test.txt"
-    # path = "data/maps/challenger/01_the_impossible_dream.txt"
+    path = "data/maps/challenger/01_the_impossible_dream.txt"
 
-    # try:
-    map_data = get_data(path)
-    check_data(map_data)
-    map = Map.map_init(map_data)
-    # except Exception as e:
-    #     print("Invalid map file format")
-    #     print(e)
-    #     sys.exit()
+    try:
+        map_data = get_data(path)
+        check_data(map_data)
+        map = Map.map_init(map_data)
+    except Exception as e:
+        print("Invalid map file format")
+        print(e)
+        sys.exit()
+
+    # path = Pathinder(map)
+    # while map.end.nb_drone != map.nb_drone:
+    #     for drone in map.drone_lst:
+    #         map.update_wheight()
+    #         drone.path = path.get_path_for_drone(drone)
+    #         if drone.path:
+    #             map.set_target(drone, drone.path.pop(0))
+    #             map.move_drone(drone)
+    #     map.clean_connection()
+    # print(f"{map.end.nb_drone}/{map.nb_drone}")
 
     pg.init()
 
@@ -82,25 +93,13 @@ def main():
                 map.update_wheight()
                 drone.path = pf.get_path_for_drone(drone)
                 if drone.path:
-                    map.set_target_drone(drone, drone.path.pop(0))
+                    map.set_target(drone, drone.path.pop(0))
+                    map.move_drone(drone)
+                    drone.start_pos = drone.proj_pos[:]
                     if not drone.stay:
-                        drone.start_pos = drone.proj_pos[:]
-                        if drone.nb_move >= drone.len_path:
-                            print(f"{drone.name}-{drone.n_hub.name}", end=' ')
-                            n_h_name = drone.n_hub.name
-                            drone.end_pos = map.project_pos[n_h_name][:]
-                        else:
-                            print(f"{drone.name}-{drone.c_hub.name}-"
-                            f"{drone.n_hub.name}", end=' ')
-                            x1, y1 = drone.start_pos[:]
-                            x2, y2 = map.project_pos[drone.n_hub.name]
-                            drone.end_pos = ((x1 + x2) / 2, (y1 + y2) / 2)
                         move_drone.append(drone)
-            print('\n')
-            map.clean_connection()
 
             if map.nb_drone == map.end.nb_drone:
-                print()
                 print(f"Total turn : {nb_turn}")
                 print(f"{map.end.nb_drone}/{map.nb_drone} drone "
                       f"in {map.end.name}")

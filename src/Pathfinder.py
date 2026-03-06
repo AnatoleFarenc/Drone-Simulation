@@ -24,6 +24,7 @@ class Pathinder():
 
     def get_path_for_drone(self, drone: Drone):
         self.__start = drone.c_hub
+        self.__next_hubs = []
 
         if drone.c_hub.name == self.map.start.name:
             self.__next_hubs.append(drone.c_hub)

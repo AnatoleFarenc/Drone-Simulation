@@ -10,7 +10,7 @@ class Drone():
         self.c_hub = c_hub
         self.n_hub = c_hub
         self.len_path = 1
-        self.nb_move = 0
+        self.nb_step = 0
         self.__stay = False
         self.__path = []
         self.con = None
@@ -56,20 +56,20 @@ class Drone():
     @len_path.setter
     def len_path(self, len: int) -> None:
         """ Set len path """
-        if len > 0:
+        if len >= 0:
             self.__len_path = len
         else:
             raise ValueError(f"Error: len({len} must be > 0)")
 
     @property
-    def nb_move(self) -> int:
-        """ Return nb_move remaining """
-        return self.__nb_move
+    def nb_step(self) -> int:
+        """ Return nb_step remaining """
+        return self.__nb_step
 
-    @nb_move.setter
-    def nb_move(self, move) -> None:
-        """ Set move to nb_move """
-        self.__nb_move = move
+    @nb_step.setter
+    def nb_step(self, step) -> None:
+        """ Set step to nb_step """
+        self.__nb_step = step
 
     @property
     def stay(self) -> bool:
