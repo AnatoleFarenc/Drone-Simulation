@@ -335,15 +335,22 @@ class Map():
             self.movements.append(movements_turn)
         return self.movements
 
-    def print_path(self):
+    def print_path(self) -> str:
         if not self.movements:
             self.play_map()
             if not self.movements:
                 raise ValueError("Error: No movement find")
 
+        str_path = ""
         for i, elem in enumerate(self.movements, 1):
             print(f"Turn: {i}")
+            str_path += f"Turn: {i}\n"
             print(" ".join(elem))
+            str_path += " ".join(elem)
+            str_path+= '\n'
 
         print()
+        str_path += '\n'
         print(f"Total Turn: {len(self.movements)}")
+        str_path += f"Total Turn: {len(self.movements)}\n"
+        return str_path

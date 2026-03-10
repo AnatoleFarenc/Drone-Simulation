@@ -2,10 +2,9 @@ from src.parser import get_data, check_data
 from src.Map import Map
 from src.Renderer import Renderer
 from src.Pathfinder import Pathinder
-from src.visualizer import view_simulation, animate
-from src import pg
 import sys
 from src.config import W_SIZE
+from src.Menu import Menu
 
 
 def main():
@@ -26,16 +25,16 @@ def main():
         map_data = get_data(path)
         check_data(map_data)
         map = Map.map_init(map_data)
-        map_display = Map.map_init(map_data)
     except Exception as e:
         print("Invalid map file format")
         print(e)
         sys.exit()
 
-    map.print_path()
-    animate(map)
+    # map.print_path()
+    # animate(map)
 
-  
+    Menu.menu_init(map, path)
+    Menu().run()
 
 if __name__ == "__main__":
     main()

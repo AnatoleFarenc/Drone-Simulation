@@ -13,5 +13,5 @@ sys.stdout.close()
 sys.stdout = stdout_backup
 __all__ = [
     'Connection', 'Hub', 'Map',
-    'get_data', 'check_data'
+    'get_data', 'check_data', 'pg'
 ]
