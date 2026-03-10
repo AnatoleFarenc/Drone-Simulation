@@ -1,6 +1,7 @@
 from src.Map import Map
+from src.Hub import Hub
 from src.Drone import Drone
-from math import inf
+from math import inf, hypot
 import heapq
 
 
@@ -22,53 +23,56 @@ class Pathinder():
         """ Set map """
         self.__map = map
 
+    def __heuristic(self, hub: Hub) -> float:
+        x1, y1 = hub.pos
+        x2, y2 = self.__end.pos
+        return hypot(x2-x1, y2-y1)
+
+    def __edge_weight(self, hub: Hub) -> int:
+        weight = hub.weight
+        if hub.c_setting.get("zone"):
+            if hub.c_setting["zone"] == "restricted":
+                weight += 5
+            elif hub.c_setting["zone"] == "priority":
+                weight = max(1, weight - 1)
+        if hub.max_drone == 1:
+            weight += 10
+        elif hub.max_drone == 2:
+            weight += 5
+        elif hub.max_drone < 5:
+            weight += 2
+        congestion = hub.nb_drone / max(1, hub.max_drone)
+        weight += int(congestion * 3)
+        return weight
+
     def get_path_for_drone(self, drone: Drone):
         self.__start = drone.c_hub
-        self.__next_hubs = []
+        self.__next_hubs = [self.map.start] + self.map.hub_lst + [self.map.end]
 
-        if drone.c_hub.name == self.map.start.name:
-            self.__next_hubs.append(drone.c_hub)
-            self.__next_hubs += self.map.hub_lst
-        else:
-            for hub in self.map.hub_lst:
-                if hub.name == drone.c_hub.name:
-                    hub_i = self.map.hub_lst.index(hub)
-                    self.__next_hubs = self.map.hub_lst[hub_i:]
-                    break
-        self.__next_hubs.append(self.map.end)
-
-        pq = []
-        neighbors = self.map.give_adjacent_lst(self.__next_hubs)
         dist = {hub.name: inf for hub in self.__next_hubs if hub.is_visible}
         dist[self.__start.name] = 0
-
         prev_h = {}
-        heapq.heappush(pq, (0, self.__start.name))
+
+        pq = [(self.__heuristic(self.__start), 0, self.__start.name)]
+        neighbors = self.map.give_adjacent_lst(self.__next_hubs)
 
         while pq:
-            c_d, c_h = heapq.heappop(pq)
+            f, g, c_h = heapq.heappop(pq)
 
-            if c_h == self.__end:
+            if c_h == self.__end.name:
                 break
 
             for n_h in neighbors[c_h]:
                 if not n_h.is_visible:
                     continue
 
-                weight = n_h.weight
-                # if n_h.nb_drone >= n_h.max_drone:
-                #     weight += inf
-                if n_h.c_setting.get("zone"):
-                    if n_h.c_setting["zone"] == "restricted":
-                        weight += 10
-                    if n_h.c_setting["zone"] == "priority":
-                        weight = max(1, weight - 1)
-
-                n_d = c_d + weight
-                if n_d < dist[n_h.name]:
-                    dist[n_h.name] = n_d
+                weight = self.__edge_weight(n_h)
+                ng = g + weight
+                if ng < dist[n_h.name]:
+                    dist[n_h.name] = ng
                     prev_h[n_h.name] = self.map.get_hub(c_h)
-                    heapq.heappush(pq, (dist[n_h.name], n_h.name))
+                    nh_f = ng + self.__heuristic(n_h)
+                    heapq.heappush(pq, (nh_f, ng, n_h.name))
 
         path = []
         current = self.__end

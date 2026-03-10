@@ -31,17 +31,6 @@ def main():
         print(e)
         sys.exit()
 
-    # path = Pathinder(map)
-    # while map.end.nb_drone != map.nb_drone:
-    #     for drone in map.drone_lst:
-    #         map.update_wheight()
-    #         drone.path = path.get_path_for_drone(drone)
-    #         if drone.path:
-    #             map.set_target(drone, drone.path.pop(0))
-    #             map.move_drone(drone)
-    #     map.clean_connection()
-    # print(f"{map.end.nb_drone}/{map.nb_drone}")
-
     pg.init()
 
     window = pg.display.set_mode(W_SIZE, pg.SCALED | pg.RESIZABLE)
@@ -54,7 +43,7 @@ def main():
     pf = Pathinder(map)
     nb_turn = 0
     t = 0
-    move_duration = 1.0
+    move_duration = 0.3
     move_drone = []
 
     for drone in map.drone_lst:
@@ -82,15 +71,16 @@ def main():
             drone.proj_pos[1] = y_1 + (y_2 - y_1) * progress
 
         if progress >= 1 and map.nb_drone != map.end.nb_drone:
+            nb_turn += 1
+
             for drone in move_drone:
                 drone.proj_pos = list(drone.end_pos[:])
             t = 0
-            nb_turn += 1
             print(f"Turn: {nb_turn}")
             move_drone.clear()
 
+            map.update_wheight()
             for drone in map.drone_lst:
-                map.update_wheight()
                 drone.path = pf.get_path_for_drone(drone)
                 if drone.path:
                     map.set_target(drone, drone.path.pop(0))
@@ -103,7 +93,7 @@ def main():
                 print(f"Total turn : {nb_turn}")
                 print(f"{map.end.nb_drone}/{map.nb_drone} drone "
                       f"in {map.end.name}")
-                # is_open = False
+                is_open = False
 
         renderer.render(window, map)
         pg.display.flip()

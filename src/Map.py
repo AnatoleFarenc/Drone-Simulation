@@ -229,53 +229,6 @@ class Map():
         raise ValueError("Error connection does not exist: "
                          f"{h_n1}-{h_n2}")
 
-    def clean_connection(self) -> None:
-        """ Clean number of drone in connection after same loop """
-        for con in self.connection_lst:
-            con.capacity = 0
-
-    # def set_target_drone(self, drone: Drone, target: Hub) -> None:
-    #     """ Set drone to the next hub [target] """
-    #     if drone.c_hub not in target.neighbors:
-    #         raise ValueError("Error: target isn't attainable "
-    #                          f"{drone.c_hub.name}")
-
-    #     if drone.nb_move < drone.len_path and drone.nb_move > 0:
-    #         drone.nb_move += 1
-    #         drone.stay = True
-    #         return False
-
-    #     drone.n_hub = target
-
-    #     con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
-    #     if con.capacity >= con.m_capacity:
-    #         con.capacity += 1
-    #         drone.stay = True
-    #         return
-    #     con.capacity += 1
-    #     if con.capacity >= con.m_capacity:
-    #         drone.c_hub.weight += 2
-
-    #     if target.c_setting.get('zone'):
-    #         if target.c_setting['zone'] == 'restricted':
-    #             drone.len_path = 2
-    #     else:
-    #         drone.len_path = 1
-
-    #     drone.nb_move = 0
-
-    #     if not drone.n_hub.is_blocked:
-    #         drone.c_hub.nb_drone -= 1
-    #         drone.n_hub.nb_drone += 1
-    #         drone.c_hub.is_blocked = False
-    #         drone.stay = False
-    #         drone.c_hub = drone.n_hub
-    #         if drone.n_hub.nb_drone == drone.n_hub.max_drone:
-    #             drone.n_hub.is_blocked = True
-    #         drone.nb_move += 1
-    #     else:
-    #         drone.stay = True
-
     def update_wheight(self) -> None:
         hub_lst = self.hub_lst
         for hub in hub_lst:
@@ -284,37 +237,27 @@ class Map():
                     hub.is_visible = False
                     continue
                 if hub.c_setting['zone'] == 'restricted':
-                    hub.weight = 3
+                    hub.weight = 4
                 elif hub.c_setting['zone'] == 'priority':
-                    hub.weight -= max(1, hub.weight - 1)
-                else:
                     hub.weight = 1
+                else:
+                    hub.weight = 2
 
             if hub.nb_drone >= hub.max_drone:
-                # raise ValueError(f"Error: {hub.name} "
-                #                  f"{hub.nb_drone}/{hub.max_drone}")
+
                 hub.is_blocked = True
             else:
                 hub.is_blocked = False
-            # if hub.is_blocked:
-            #     hub.weight += 2
-            # elif hub.weight > 1:
-            #     hub.weight -= 1
 
     def set_target(self, drone: Drone, target: Hub) -> None:
         """ Set target to the drone """
 
-        drone.n_hub = target
-
         if drone.nb_step < drone.len_path and drone.nb_step > 0:
             return
 
+        drone.n_hub = target
+
         con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
-        # if con.capacity > con.m_capacity:
-        #     drone.stay = True
-        #     return
-        # if con.capacity == con.m_capacity:
-        #     drone.c_hub.weight += 2
 
         if target.c_setting.get("zone") == "restricted":
             drone.len_path = 2
