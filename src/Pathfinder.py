@@ -14,7 +14,7 @@ class Pathinder():
         self.__next_hubs = []
 
     @property
-    def map(self) -> Map: 
+    def map(self) -> Map:
         """ Return map """
         return self.__map
 

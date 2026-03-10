@@ -10,7 +10,7 @@ from src.config import W_SIZE
 
 def main():
 
-    # path = "data/maps/easy/01_linear_path.txt"
+    path = "data/maps/easy/01_linear_path.txt"
     # path = "data/maps/easy/02_simple_fork.txt"
     # path = "data/maps/easy/03_basic_capacity.txt"
     # path = "data/maps/medium/01_dead_end_trap.txt"
@@ -20,7 +20,7 @@ def main():
     # path = "data/maps/hard/02_capacity_hell.txt"
     # path = "data/maps/hard/03_ultimate_challenge.txt"
     # path = "data/maps/test.txt"
-    path = "data/maps/challenger/01_the_impossible_dream.txt"
+    # path = "data/maps/challenger/01_the_impossible_dream.txt"
 
     try:
         map_data = get_data(path)
@@ -31,74 +31,76 @@ def main():
         print(e)
         sys.exit()
 
-    pg.init()
+    map.print_path()
 
-    window = pg.display.set_mode(W_SIZE, pg.SCALED | pg.RESIZABLE)
-    pg.display.set_caption("FLY IN")
-    clock = pg.time.Clock()
+    # pg.init()
 
-    is_open = True
-    renderer = Renderer()
+    # window = pg.display.set_mode(W_SIZE, pg.SCALED | pg.RESIZABLE)
+    # pg.display.set_caption("FLY IN")
+    # clock = pg.time.Clock()
 
-    pf = Pathinder(map)
-    nb_turn = 0
-    t = 0
-    move_duration = 0.3
-    move_drone = []
+    # is_open = True
+    # renderer = Renderer()
 
-    for drone in map.drone_lst:
-        drone.proj_pos[0] = map.project_pos[map.start.name][0]
-        drone.proj_pos[1] = map.project_pos[map.start.name][1]
+    # pf = Pathinder(map)
+    # nb_turn = 1
+    # t = 0
+    # move_duration = 0.3
+    # move_drone = []
 
-    while is_open:
-        dt = clock.tick(60) / 1000
-        t += dt
-        progress = t / move_duration
-        progress = min(progress, 1)
-        progress = (1 - math.cos(progress * math.pi)) / 2
+    # for drone in map.drone_lst:
+    #     drone.proj_pos[0] = map.project_pos[map.start.name][0]
+    #     drone.proj_pos[1] = map.project_pos[map.start.name][1]
 
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                is_open = False
-            elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_ESCAPE:
-                    is_open = False
+    # while is_open:
+    #     dt = clock.tick(60) / 1000
+    #     t += dt
+    #     progress = t / move_duration
+    #     progress = min(progress, 1)
+    #     progress = (1 - math.cos(progress * math.pi)) / 2
 
-        for drone in move_drone:
-            x_1, y_1 = drone.start_pos
-            x_2, y_2 = drone.end_pos
-            drone.proj_pos[0] = x_1 + (x_2 - x_1) * progress
-            drone.proj_pos[1] = y_1 + (y_2 - y_1) * progress
+    #     for event in pg.event.get():
+    #         if event.type == pg.QUIT:
+    #             is_open = False
+    #         elif event.type == pg.KEYDOWN:
+    #             if event.key == pg.K_ESCAPE:
+    #                 is_open = False
 
-        if progress >= 1 and map.nb_drone != map.end.nb_drone:
-            nb_turn += 1
+    #     for drone in move_drone:
+    #         x_1, y_1 = drone.start_pos
+    #         x_2, y_2 = drone.end_pos
+    #         drone.proj_pos[0] = x_1 + (x_2 - x_1) * progress
+    #         drone.proj_pos[1] = y_1 + (y_2 - y_1) * progress
 
-            for drone in move_drone:
-                drone.proj_pos = list(drone.end_pos[:])
-            t = 0
-            print(f"Turn: {nb_turn}")
-            move_drone.clear()
+    #     if progress >= 1 and map.nb_drone != map.end.nb_drone:
 
-            map.update_wheight()
-            for drone in map.drone_lst:
-                drone.path = pf.get_path_for_drone(drone)
-                if drone.path:
-                    map.set_target(drone, drone.path.pop(0))
-                    map.move_drone(drone)
-                    drone.start_pos = drone.proj_pos[:]
-                    if not drone.stay:
-                        move_drone.append(drone)
+    #         for drone in move_drone:
+    #             drone.proj_pos = list(drone.end_pos[:])
+    #         t = 0
+    #         move_drone.clear()
+    #         print(f"Turn: {nb_turn}")
 
-            if map.nb_drone == map.end.nb_drone:
-                print(f"Total turn : {nb_turn}")
-                print(f"{map.end.nb_drone}/{map.nb_drone} drone "
-                      f"in {map.end.name}")
-                is_open = False
+    #         map.update_wheight()
+    #         for drone in map.drone_lst:
+    #             drone.path = pf.get_path_for_drone(drone)
+    #             if drone.path:
+    #                 map.set_target(drone, drone.path.pop(0))
+    #                 map.move_drone(drone)
+    #                 drone.start_pos = drone.proj_pos[:]
+    #                 if not drone.stay:
+    #                     move_drone.append(drone)
 
-        renderer.render(window, map)
-        pg.display.flip()
+    #         if map.nb_drone == map.end.nb_drone:
+    #             print(f"Total turn : {nb_turn}")
+    #             print(f"{map.end.nb_drone}/{map.nb_drone} drone "
+    #                   f"in {map.end.name}")
+    #             is_open = False
+    #         nb_turn += 1
 
-    pg.quit()
+    #     renderer.render(window, map)
+    #     pg.display.flip()
+
+    # pg.quit()
 
 
 if __name__ == "__main__":

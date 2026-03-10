@@ -15,6 +15,7 @@ class Map():
         self.__connection_lst = []
         self.__drone_lst = []
         self.__project_pos = dict()
+        self.__movements = []
 
     @property
     def nb_drone(self) -> int:
@@ -100,6 +101,16 @@ class Map():
     def project_pos(self, p_pos: Dict) -> None:
         """ Set projet pos list """
         self.__project_pos = p_pos
+
+    @property
+    def movements(self) -> List[List[str]]:
+        """ Return list of different movement to drone """
+        return self.__movements
+
+    @movements.setter
+    def movements(self, movements: List[List[str]]) -> None:
+        """ Set movements list """
+        self.__movements = movements
 
     @staticmethod
     def parse_complementary_data(data: str) -> Dict:
@@ -274,25 +285,58 @@ class Map():
             drone.c_hub.nb_drone -= 1
             drone.stay = False
 
-    def move_drone(self, drone: Drone) -> None:
+    def move_drone(self, drone: Drone) -> str:
         """ Move the drone to the next destionation """
         if drone.stay:
-            return
+            return f"{drone.name}-stay"
         drone.nb_step += 1
         if drone.nb_step >= drone.len_path:
-            print(f"{drone.name}-{drone.n_hub.name}", end=' ')
-            print()
+            # print(f"{drone.name}-{drone.n_hub.name}", end=' ')
+            # print()
             con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
             con.capacity = 0
             drone.c_hub = drone.n_hub
             drone.nb_step = 0
 
-            n_h_name = drone.n_hub.name
-            drone.end_pos = self.project_pos[n_h_name][:]
+            # n_h_name = drone.n_hub.name
+            # drone.end_pos = self.project_pos[n_h_name][:]
+            return f"{drone.name}-{drone.n_hub.name}"
         else:
-            print(f"{drone.name}-{drone.c_hub.name}-"
-                  f"{drone.n_hub.name}", end=' ')
-            print()
-            x1, y1 = self.project_pos[drone.c_hub.name]
-            x2, y2 = self.project_pos[drone.n_hub.name]
-            drone.end_pos = ((x1 + x2) / 2, (y1 + y2) / 2)
+            # print(f"{drone.name}-{drone.c_hub.name}-"
+            #       f"{drone.n_hub.name}", end=' ')
+            # print()
+            return (f"{drone.name}-{drone.c_hub.name}-"
+                    f"{drone.n_hub.name}")
+            # x1, y1 = self.project_pos[drone.c_hub.name]
+            # x2, y2 = self.project_pos[drone.n_hub.name]
+            # drone.end_pos = ((x1 + x2) / 2, (y1 + y2) / 2)
+
+    def play_map(self) -> List[List[str]]:
+        from src.Pathfinder import Pathinder
+        pf = Pathinder(self)
+        self.movements = []
+        self.update_wheight()
+        while self.end.nb_drone < self.nb_drone:
+            movements_turn = []
+            for drone in self.drone_lst:
+                drone.path = pf.get_path_for_drone(drone)
+                if drone.path:
+                    self.set_target(drone, drone.path.pop(0))
+                    movements_turn.append(self.move_drone(drone))
+                else:
+                    movements_turn.append(f"{drone.name}-stay")
+            self.movements.append(movements_turn)
+        return self.movements
+
+    def print_path(self):
+        if not self.movements:
+            self.play_map()
+            if not self.movements:
+                raise ValueError("Error: No movement find")
+
+        for i, elem in enumerate(self.movements, 1):
+            print(f"Turn: {i}")
+            print(" ".join(elem))
+
+        print()
+        print(f"Total Turn: {len(self.movements)}")
