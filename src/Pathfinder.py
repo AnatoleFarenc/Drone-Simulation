@@ -36,13 +36,13 @@ class Pathinder():
             elif hub.c_setting["zone"] == "priority":
                 weight = max(1, weight - 1)
         if hub.max_drone == 1:
-            weight += 10
+            weight += 25
         elif hub.max_drone == 2:
-            weight += 5
+            weight += 12
         elif hub.max_drone < 5:
-            weight += 2
+            weight += 6
         congestion = hub.nb_drone / max(1, hub.max_drone)
-        weight += int(congestion * 3)
+        weight += int(congestion * 12)
         return weight
 
     def get_path_for_drone(self, drone: Drone):

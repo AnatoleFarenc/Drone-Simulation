@@ -239,6 +239,13 @@ class Map():
                 return con
         raise ValueError("Error connection does not exist: "
                          f"{h_n1}-{h_n2}")
+    
+    def get_drone(self, drone_name: str) -> Drone | None:
+        """ Return drone with same name """
+        for drone in self.drone_lst:
+            if drone.name == drone_name:
+                return drone
+        return None
 
     def update_wheight(self) -> None:
         hub_lst = self.hub_lst
