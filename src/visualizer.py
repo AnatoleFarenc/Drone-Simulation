@@ -1,10 +1,8 @@
 from .Map import Map
-from typing import List
 from .Renderer import Renderer
 from . import pg
 from .config import W_SIZE
 import math
-
 
 
 def view_simulation(map: Map, turn_idx: int):

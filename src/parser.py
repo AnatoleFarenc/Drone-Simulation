@@ -8,6 +8,8 @@ def get_data(map_path: str) -> Dict:
     map_data = {}
     index_hub = 1
     index_connection = 0
+    nb_start_h = 0
+    nb_end_h = 0
     try:
         with open(map_path, 'r') as file:
             for i, line in enumerate(file, start=1):
@@ -18,6 +20,14 @@ def get_data(map_path: str) -> Dict:
                     except ValueError:
                         raise ValueError("Error: missing key or value\n"
                                          f"line {i}: {line}")
+
+                    if key == "start_hub":
+                        nb_start_h += 1
+                    if key == "end_hub":
+                        nb_end_h += 1
+                    if nb_start_h > 1 or nb_end_h > 1:
+                        raise ValueError("Error: too much start or end hub")
+
                     if line.startswith("hub"):
                         key += str(index_hub)
                         index_hub += 1
@@ -124,37 +134,45 @@ def check_data(map_data: Dict) -> None:
             check_meta_data(meta_data, ['max_link_capacity'])
 
 
-# def main():
-#     path = "maps/hard/"
-#     map_data = get_data(path+"01_maze_nightmare.txt")
-#     mape = Map.map_init(map_data)
+def main():
+    from src.Map import Map
 
-#     print()
-#     print("### Map Data ###")
-#     print(f"Drones: {mape.nb_drone}")
-#     print()
+    path = "data/maps/test/test.txt"
+    try:
+        map_data = get_data(path)
+        check_data(map_data)
+        mape = Map.map_init(map_data)
+    except Exception as e:
+        print("Invalid map file format")
+        print(e)
+        sys.exit()
 
-#     print("## Hub")
-#     print(f"{mape.start.name}: {mape.start.pos}")
-#     print()
-#     for hub in mape.hub_lst:
-#         print(f"{hub.name}: {hub.pos}")
-#     print()
-#     print(f"{mape.end.name}: {mape.end.pos}")
+    print()
+    print("### Map Data ###")
+    print(f"Drones: {mape.nb_drone}")
+    print()
 
-#     print()
+    print("## Hub")
+    print(f"{mape.start.name}: {mape.start.pos}")
+    print()
+    for hub in mape.hub_lst:
+        print(f"{hub.name}: {hub.pos}")
+    print()
+    print(f"{mape.end.name}: {mape.end.pos}")
 
-#     print("## Connection")
-#     for i, connection in enumerate(mape.connection_lst):
-#         print(f"connection {i}: {connection}")
-#     print()
+    print()
 
-#     print("### Collor ###")
-#     print(f"{mape.start.name}: {mape.start.c_setting['color']}")
-#     for hub in mape.hub_lst:
-#         print(f"{hub.name}: {hub.c_setting['color']}")
-#     print(f"{mape.end.name}: {mape.end.c_setting['color']}")
+    print("## Connection")
+    for i, connection in enumerate(mape.connection_lst):
+        print(f"connection {i}: {connection}")
+    print()
+
+    print("### Collor ###")
+    print(f"{mape.start.name}: {mape.start.c_setting['color']}")
+    for hub in mape.hub_lst:
+        print(f"{hub.name}: {hub.c_setting['color']}")
+    print(f"{mape.end.name}: {mape.end.c_setting['color']}")
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

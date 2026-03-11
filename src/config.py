@@ -11,3 +11,6 @@ LINE_C = (90, 90, 110)
 GOAL_C = (80, 220, 120)
 HUB_C = (80, 140, 255)
 START_C = (240, 80, 80)
+
+SPEED = 1.0
+ROOT_NAME = "data/maps/"

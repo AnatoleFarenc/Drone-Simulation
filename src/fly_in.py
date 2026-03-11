@@ -1,25 +1,36 @@
 from src.parser import get_data, check_data
 from src.Map import Map
-from src.Renderer import Renderer
-from src.Pathfinder import Pathinder
 import sys
-from src.config import W_SIZE
+from pathlib import Path
+from src.config import ROOT_NAME
 from src.Menu import Menu
 
 
 def main():
 
-    # path = "data/maps/easy/01_linear_path.txt"
-    # path = "data/maps/easy/02_simple_fork.txt"
-    # path = "data/maps/easy/03_basic_capacity.txt"
-    # path = "data/maps/medium/01_dead_end_trap.txt"
-    # path = "data/maps/medium/02_circular_loop.txt"
-    # path = "data/maps/medium/03_priority_puzzle.txt"
-    # path = "data/maps/hard/01_maze_nightmare.txt"
-    # path = "data/maps/hard/02_capacity_hell.txt"
-    path = "data/maps/hard/03_ultimate_challenge.txt"
-    # path = "data/maps/test.txt"
-    # path = "data/maps/challenger/01_the_impossible_dream.txt"
+    try:
+        map_root = Path(ROOT_NAME)
+
+        path_dict = {
+            dirm.name: [maps.name for maps in dirm.iterdir() if maps.is_file()]
+            for dirm in map_root.iterdir()
+            if dirm.is_dir()
+        }
+
+        keys = [key for key, _ in path_dict.items()]
+        if not keys:
+            raise FileNotFoundError
+        dir_name = ["challenger", "hard", "medium", "easy"]
+        for name in dir_name:
+            if name in keys:
+                keys.remove(name)
+                keys.insert(0, name)
+
+    except FileNotFoundError:
+        print("Error: Wrong map directory")
+        sys.exit(1)
+
+    path = ROOT_NAME + keys[0] + '/' + path_dict[keys[0]][0]
 
     try:
         map_data = get_data(path)
@@ -30,11 +41,9 @@ def main():
         print(e)
         sys.exit()
 
-    # map.print_path()
-    # animate(map)
-
-    Menu.menu_init(map, path)
+    Menu.menu_init(map, path, path_dict)
     Menu().run()
+
 
 if __name__ == "__main__":
     main()

@@ -2,7 +2,7 @@ from typing import List, Self, Dict
 from src.Hub import Hub
 from src.Connection import Connection
 from src.Drone import Drone
-from src.config import W_SIZE, OFFSET_EDGE
+from src.config import W_SIZE, OFFSET_EDGE, SPEED
 import re
 
 
@@ -16,6 +16,7 @@ class Map():
         self.__drone_lst = []
         self.__project_pos = dict()
         self.__movements = []
+        self.__speed = SPEED
 
     @property
     def nb_drone(self) -> int:
@@ -111,6 +112,19 @@ class Map():
     def movements(self, movements: List[List[str]]) -> None:
         """ Set movements list """
         self.__movements = movements
+
+    @property
+    def speed(self) -> float:
+        """ Return visual speed movement of one turn """
+        return self.__speed
+
+    @speed.setter
+    def speed(self, speed: float) -> None:
+        """ Set speed value """
+        if speed > 0:
+            self.__speed = speed
+        else:
+            self.__speed = 1.0
 
     @staticmethod
     def parse_complementary_data(data: str) -> Dict:
@@ -239,7 +253,7 @@ class Map():
                 return con
         raise ValueError("Error connection does not exist: "
                          f"{h_n1}-{h_n2}")
-    
+
     def get_drone(self, drone_name: str) -> Drone | None:
         """ Return drone with same name """
         for drone in self.drone_lst:
@@ -298,25 +312,14 @@ class Map():
             return f"{drone.name}-stay"
         drone.nb_step += 1
         if drone.nb_step >= drone.len_path:
-            # print(f"{drone.name}-{drone.n_hub.name}", end=' ')
-            # print()
             con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
             con.capacity = 0
             drone.c_hub = drone.n_hub
             drone.nb_step = 0
-
-            # n_h_name = drone.n_hub.name
-            # drone.end_pos = self.project_pos[n_h_name][:]
             return f"{drone.name}-{drone.n_hub.name}"
         else:
-            # print(f"{drone.name}-{drone.c_hub.name}-"
-            #       f"{drone.n_hub.name}", end=' ')
-            # print()
             return (f"{drone.name}-{drone.c_hub.name}-"
                     f"{drone.n_hub.name}")
-            # x1, y1 = self.project_pos[drone.c_hub.name]
-            # x2, y2 = self.project_pos[drone.n_hub.name]
-            # drone.end_pos = ((x1 + x2) / 2, (y1 + y2) / 2)
 
     def play_map(self) -> List[List[str]]:
         from src.Pathfinder import Pathinder
@@ -345,9 +348,18 @@ class Map():
         for i, elem in enumerate(self.movements, 1):
             print(f"Turn: {i}")
             str_path += f"Turn: {i}\n"
+
+            # Delet stay movement
+            stay_movement = []
+            for move in elem:
+                if move.endswith("-stay"):
+                    stay_movement.append(move)
+            for move in stay_movement:
+                elem.remove(move)
+
             print(" ".join(elem))
             str_path += " ".join(elem)
-            str_path+= '\n'
+            str_path += '\n'
 
         print()
         str_path += '\n'
