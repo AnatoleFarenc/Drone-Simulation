@@ -4,7 +4,8 @@ from math import inf
 
 class Hub():
     def __init__(self, name: str, pos: Tuple[int, int],
-                 complementary_setting: Dict[Any, Any]):
+                 complementary_setting: Dict[Any, Any],
+                 s_e_name: str = ""):
         """ Init Hub parameters """
         self.__c_setting: Dict[Any, Any] = {}
         self.__neighbors: List["Hub"] = []
@@ -21,7 +22,7 @@ class Hub():
         if self.c_setting.get("max_drones"):
             self.max_drone = int(self.c_setting["max_drones"])
         else:
-            if self.name == "start" or self.name == "goal":
+            if self.name == s_e_name:
                 self.max_drone = inf
 
     @property

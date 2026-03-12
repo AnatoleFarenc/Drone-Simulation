@@ -45,6 +45,12 @@ def animate(map: Map, speed: float = 1.0):
     if not map.movements:
         map.play_map()
 
+    if not map.movements:
+        raise ValueError("Error: No movement find")
+
+    if map.movements[0][0] == "impossible":
+        return "This map is impossible to solve"
+
     for d in map.drone_lst:
         d.c_hub = map.start
 

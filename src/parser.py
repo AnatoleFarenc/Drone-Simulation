@@ -57,13 +57,22 @@ def check_meta_data(meta_data: str, valid_setting: List[str]) -> None:
         except ValueError:
             raise ValueError(f"Error: wrong format for meta data: {data_lst}")
         if key not in valid_setting:
-            raise ValueError(f"Error: wrong setting: {key} int [{meta_data}]")
+            raise ValueError(f"Error: wrong setting: {key}:[{meta_data}]")
         if not value.strip():
             raise ValueError(f"Error: missing value: {key}: {value}")
         if key == "max_drones" or key == "max_link_capacity":
             if not value.isnumeric():
                 raise ValueError(f"Error: for '{key}' the paramer must be "
                                  f"positive interger : '{key}: {value}'")
+        if key == "color":
+            if not value.isalpha or not value.islower():
+                raise ValueError(f"Error: for '{key}' the paramer must be "
+                                 f"an color : '{key}: {value}'")
+        if key == "zone":
+            valid_zone = ["normal", "blocked", "restricted", "priority"]
+            if value not in valid_zone:
+                raise ValueError(f"Error: for '{key}' the paramer must be "
+                                 f"a valid zone : '{key}: {value}'")
 
 
 def check_data(map_data: Dict) -> None:
@@ -104,8 +113,7 @@ def check_data(map_data: Dict) -> None:
         if len(hub.split(' ')) > 3:
             meta_data = hub.split(' ', 3)[3]
             check_meta_data(meta_data,
-                            ['zone', 'color', 'max_drones', 'normal',
-                             'blocked', 'restricted', 'priority'])
+                            ['zone', 'color', 'max_drones'])
 
     # check connection
     hub_con = [value for key, value in map_data.items()

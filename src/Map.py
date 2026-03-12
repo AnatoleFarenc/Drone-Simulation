@@ -193,10 +193,10 @@ class Map():
                     raise ValueError(f"Error: Inalid coordinate:\n"
                                      f"{name} ({x}, {y})")
                 c_setting = n_map.parse_complementary_data(c_data)
-                if "start" in name:
-                    n_map.start = Hub(name, (x, y), c_setting)
-                elif "goal" in name:
-                    n_map.end = Hub(name, (x, y), c_setting)
+                if key == "start_hub":
+                    n_map.start = Hub(name, (x, y), c_setting, name)
+                elif key == "end_hub":
+                    n_map.end = Hub(name, (x, y), c_setting, name)
                 else:
                     n_map.append_hub(Hub(name, (x, y), c_setting))
                 continue
@@ -251,8 +251,7 @@ class Map():
             if (h1.name == h_n1 and h2.name == h_n2 or
                h1.name == h_n2 and h2.name == h_n1):
                 return con
-        raise ValueError("Error connection does not exist: "
-                         f"{h_n1}-{h_n2}")
+        return None
 
     def get_drone(self, drone_name: str) -> Drone | None:
         """ Return drone with same name """
@@ -313,7 +312,7 @@ class Map():
         drone.nb_step += 1
         if drone.nb_step >= drone.len_path:
             con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
-            con.capacity = 0
+            con.capacity = max(0, con.capacity - 1)
             drone.c_hub = drone.n_hub
             drone.nb_step = 0
             return f"{drone.name}-{drone.n_hub.name}"
@@ -328,13 +327,27 @@ class Map():
         self.update_wheight()
         while self.end.nb_drone < self.nb_drone:
             movements_turn = []
+            all_stuck = True
             for drone in self.drone_lst:
-                drone.path = pf.get_path_for_drone(drone)
+                if drone.c_hub == self.end:
+                    continue
+
+                drone.path = pf.get_path_for_drone(drone)      
                 if drone.path:
+                    all_stuck = False
                     self.set_target(drone, drone.path.pop(0))
-                    movements_turn.append(self.move_drone(drone))
-                else:
-                    movements_turn.append(f"{drone.name}-stay")
+                    # movements_turn.append(self.move_drone(drone))
+                # else:
+                #     movements_turn.append(f"{drone.name}-stay")
+            
+            if all_stuck:
+                self.movements = [["impossible"]]
+                return [["impossible"]]
+            
+            for drone in self.drone_lst:
+                if drone.c_hub == self.end:
+                    continue
+                movements_turn.append(self.move_drone(drone))
             self.movements.append(movements_turn)
         return self.movements
 
@@ -344,10 +357,11 @@ class Map():
             if not self.movements:
                 raise ValueError("Error: No movement find")
 
+        if self.movements[0][0] == "impossible":
+            return "This map is impossible to solve"
+
         str_path = ""
-        for i, elem in enumerate(self.movements, 1):
-            print(f"Turn: {i}")
-            str_path += f"Turn: {i}\n"
+        for elem in self.movements:
 
             # Delet stay movement
             stay_movement = []
@@ -357,12 +371,9 @@ class Map():
             for move in stay_movement:
                 elem.remove(move)
 
-            print(" ".join(elem))
             str_path += " ".join(elem)
             str_path += '\n'
 
-        print()
         str_path += '\n'
-        print(f"Total Turn: {len(self.movements)}")
-        str_path += f"Total Turn: {len(self.movements)}\n"
+        str_path += f"Total Turn: {len(self.movements) - 1}\n"
         return str_path

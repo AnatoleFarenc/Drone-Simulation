@@ -32,6 +32,9 @@ def main():
 
     path = ROOT_NAME + keys[0] + '/' + path_dict[keys[0]][0]
 
+    # path = "data/maps/easy/01_linear_path.txt"
+    # path = "data/maps/challenger/01_the_impossible_dream.txt"
+
     try:
         map_data = get_data(path)
         check_data(map_data)
@@ -40,6 +43,10 @@ def main():
         print("Invalid map file format")
         print(e)
         sys.exit()
+
+    # print(map.print_path())
+    # from .visualizer import animate
+    # print(animate(map, 1.0))
 
     Menu.menu_init(map, path, path_dict)
     Menu().run()

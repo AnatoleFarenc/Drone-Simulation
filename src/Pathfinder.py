@@ -2,6 +2,7 @@ from src.Map import Map
 from src.Hub import Hub
 from src.Drone import Drone
 from math import inf, hypot
+from typing import List
 import heapq
 
 
@@ -38,14 +39,14 @@ class Pathinder():
         if hub.max_drone == 1:
             weight += 25
         elif hub.max_drone == 2:
-            weight += 12
+            weight += 15
         elif hub.max_drone < 5:
             weight += 6
         congestion = hub.nb_drone / max(1, hub.max_drone)
         weight += int(congestion * 12)
         return weight
 
-    def get_path_for_drone(self, drone: Drone):
+    def get_path_for_drone(self, drone: Drone) -> List[str]:
         self.__start = drone.c_hub
         self.__next_hubs = [self.map.start] + self.map.hub_lst + [self.map.end]
 
