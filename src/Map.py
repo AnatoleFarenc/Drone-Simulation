@@ -285,10 +285,14 @@ class Map():
 
         if drone.nb_step < drone.len_path and drone.nb_step > 0:
             return
+        
+        if drone.con:
+            drone.con.capacity = max (0, drone.con.capacity - 1)
 
         drone.n_hub = target
 
-        con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
+        drone.con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
+        # con = 
 
         if target.c_setting.get("zone") == "restricted":
             drone.len_path = 2
@@ -296,13 +300,10 @@ class Map():
             drone.len_path = 1
 
         if (target.nb_drone >= target.max_drone or
-                con.capacity >= con.m_capacity):
+                drone.con.capacity >= drone.con.m_capacity):
             drone.stay = True
-            drone.n_hub.weight += 2
         else:
-            con.capacity += 1
-            drone.n_hub.nb_drone += 1
-            drone.c_hub.nb_drone -= 1
+            drone.con.capacity += 1
             drone.stay = False
 
     def move_drone(self, drone: Drone) -> str:
@@ -310,9 +311,10 @@ class Map():
         if drone.stay:
             return f"{drone.name}-stay"
         drone.nb_step += 1
+        if drone.nb_step != drone.path:
+            drone.c_hub.nb_drone -= 1
         if drone.nb_step >= drone.len_path:
-            con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
-            con.capacity = max(0, con.capacity - 1)
+            drone.n_hub.nb_drone += 1
             drone.c_hub = drone.n_hub
             drone.nb_step = 0
             return f"{drone.name}-{drone.n_hub.name}"
@@ -320,34 +322,35 @@ class Map():
             return (f"{drone.name}-{drone.c_hub.name}-"
                     f"{drone.n_hub.name}")
 
+
     def play_map(self) -> List[List[str]]:
         from src.Pathfinder import Pathinder
         pf = Pathinder(self)
         self.movements = []
-        self.update_wheight()
         while self.end.nb_drone < self.nb_drone:
             movements_turn = []
             all_stuck = True
+
+            # clear end connection
+            for drone in self.drone_lst:
+                if drone.c_hub == self.end and drone.con:
+                    drone.con.capacity = max(0, drone.con.capacity - 1)
+                    drone.con = None
+
             for drone in self.drone_lst:
                 if drone.c_hub == self.end:
                     continue
 
-                drone.path = pf.get_path_for_drone(drone)      
+                drone.path = pf.get_path_for_drone(drone)
                 if drone.path:
                     all_stuck = False
                     self.set_target(drone, drone.path.pop(0))
-                    # movements_turn.append(self.move_drone(drone))
-                # else:
-                #     movements_turn.append(f"{drone.name}-stay")
-            
+                    movements_turn.append(self.move_drone(drone))
+
             if all_stuck:
                 self.movements = [["impossible"]]
                 return [["impossible"]]
-            
-            for drone in self.drone_lst:
-                if drone.c_hub == self.end:
-                    continue
-                movements_turn.append(self.move_drone(drone))
+
             self.movements.append(movements_turn)
         return self.movements
 
@@ -375,5 +378,5 @@ class Map():
             str_path += '\n'
 
         str_path += '\n'
-        str_path += f"Total Turn: {len(self.movements) - 1}\n"
+        str_path += f"Total Turn: {len(self.movements)}\n"
         return str_path

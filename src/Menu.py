@@ -77,6 +77,9 @@ class Menu(App):
                 cls.dirs.remove(name)
                 cls.dirs.insert(0, name)
 
+        for dir, _ in cls.path_dict.items():
+            cls.path_dict[dir].sort()
+
         cls.idx_file = 0
         cls.idx_dir = 0
         cls.file_name = path.split('/')[-1]

@@ -29,21 +29,24 @@ class Pathinder():
         x2, y2 = self.__end.pos
         return hypot(x2-x1, y2-y1)
 
-    def __edge_weight(self, hub: Hub) -> int:
-        weight = hub.weight
-        if hub.c_setting.get("zone"):
-            if hub.c_setting["zone"] == "restricted":
-                weight += 5
-            elif hub.c_setting["zone"] == "priority":
-                weight = max(1, weight - 1)
-        if hub.max_drone == 1:
-            weight += 25
-        elif hub.max_drone == 2:
-            weight += 15
-        elif hub.max_drone < 5:
-            weight += 6
-        congestion = hub.nb_drone / max(1, hub.max_drone)
-        weight += int(congestion * 12)
+    def __edge_weight(self, c_hub, n_hub: Hub) -> int:
+
+        con = self.map.search_connection(c_hub.name, n_hub.name)
+
+        zone = n_hub.c_setting.get("zone")
+        if zone == "restricted":
+            weight = 4
+        elif zone == "priority":
+            weight = 1
+        else:
+            weight = 3
+
+        if n_hub.nb_drone >= n_hub.max_drone:
+            weight += 1
+        if con and con.capacity >= con.m_capacity:
+            weight += 2
+
+
         return weight
 
     def get_path_for_drone(self, drone: Drone) -> List[str]:
@@ -67,7 +70,7 @@ class Pathinder():
                 if not n_h.is_visible:
                     continue
 
-                weight = self.__edge_weight(n_h)
+                weight = self.__edge_weight(self.map.get_hub(c_h), n_h)
                 ng = g + weight
                 if ng < dist[n_h.name]:
                     dist[n_h.name] = ng
