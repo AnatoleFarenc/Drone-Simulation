@@ -21,6 +21,13 @@ def get_data(map_path: str) -> Dict:
                         raise ValueError("Error: missing key or value\n"
                                          f"line {i}: {line}")
 
+                    if (
+                        "hub" in key
+                        and key not in {"hub", "start_hub", "end_hub"}
+                    ):
+                        raise ValueError(f"Error: invalid key for hub\n"
+                                         f"line {i}: {line}")
+
                     if key == "start_hub":
                         nb_start_h += 1
                     if key == "end_hub":
@@ -44,6 +51,7 @@ def get_data(map_path: str) -> Dict:
 
 
 def check_meta_data(meta_data: str, valid_setting: List[str]) -> None:
+    """ Validate metadata block against allowed keys """
     # check braket
     if meta_data[0] != '[' or meta_data[-1] != ']':
         raise ValueError("Error: meta data must be contain in '[]': "
@@ -59,13 +67,13 @@ def check_meta_data(meta_data: str, valid_setting: List[str]) -> None:
         if key not in valid_setting:
             raise ValueError(f"Error: wrong setting: {key}:[{meta_data}]")
         if not value.strip():
-            raise ValueError(f"Error: missing value: {key}: {value}")
+            raise ValueError(f"Error: missing value: {key} {value}")
         if key == "max_drones" or key == "max_link_capacity":
             if not value.isnumeric():
                 raise ValueError(f"Error: for '{key}' the paramer must be "
                                  f"positive interger : '{key}: {value}'")
         if key == "color":
-            if not value.isalpha or not value.islower():
+            if not value.isalpha() or not value.islower():
                 raise ValueError(f"Error: for '{key}' the paramer must be "
                                  f"an color : '{key}: {value}'")
         if key == "zone":
@@ -142,7 +150,8 @@ def check_data(map_data: Dict) -> None:
             check_meta_data(meta_data, ['max_link_capacity'])
 
 
-def main():
+def main() -> None:
+    """ Debug parser with sample test map """
     from src.Map import Map
 
     path = "data/maps/test/test.txt"

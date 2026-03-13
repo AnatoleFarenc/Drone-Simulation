@@ -3,10 +3,12 @@ from .Renderer import Renderer
 from . import pg
 from .config import W_SIZE
 import math
+from .Drone import Drone
 
 
-def view_simulation(map: Map, turn_idx: int):
-    movers = []
+def view_simulation(map: Map, turn_idx: int) -> list[Drone]:
+    """ Prepare moving drones for one turn """
+    movers: list[Drone] = []
     if turn_idx < 0 or turn_idx >= len(map.movements):
         return movers
 
@@ -28,20 +30,23 @@ def view_simulation(map: Map, turn_idx: int):
         else:
             hub1 = map.get_hub(parts[1])
             hub2 = map.get_hub(parts[2])
+            if hub1 is None or hub2 is None:
+                continue
             x1, y1 = map.project_pos[hub1.name]
             x2, y2 = map.project_pos[hub2.name]
-            drone.end_pos = ((x1 + x2) / 2, (y1 + y2) / 2)
+            drone.end_pos = [(x1 + x2) / 2, (y1 + y2) / 2]
             drone.c_hub = hub2
             continue
 
         if target is not None:
-            drone.end_pos = map.project_pos[target.name]
+            drone.end_pos = list(map.project_pos[target.name])
             drone.c_hub = target
 
     return movers
 
 
-def animate(map: Map, speed: float = 1.0):
+def animate(map: Map, speed: float = 1.0) -> str | None:
+    """ Run pygame animation from map movements """
     if not map.movements:
         map.play_map()
 
@@ -101,3 +106,4 @@ def animate(map: Map, speed: float = 1.0):
         pg.display.flip()
 
     pg.quit()
+    return None

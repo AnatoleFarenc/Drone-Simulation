@@ -4,10 +4,24 @@ from textual.containers import Horizontal, Vertical
 from src.Map import Map
 from src.visualizer import animate
 from src.parser import get_data, check_data
-from src.config import ROOT_NAME
+from src.config import ROOT_NAME, SPEED
+from pathlib import Path
+import sys
 
 
-class Menu(App):
+class Menu(App[None]):
+    """ Textual menu for simulation control """
+
+    info: bool = False
+    path_dict: dict[str, list[str]] = {}
+    dirs: list[str] = []
+    path: str = ""
+    idx_file: int = 0
+    idx_dir: int = 0
+    file_name: str = ""
+    map: Map | None = None
+    speed: float = SPEED
+
     CSS = """
     Screen {
         background: #1e1e28;
@@ -33,7 +47,8 @@ class Menu(App):
     }
 
     Log {
-        scrollbar-size: 1 0;
+        overflow-x: auto;
+        overflow-y: hidden;
     }
 
     .btn {
@@ -64,42 +79,65 @@ class Menu(App):
 """
 
     @classmethod
-    def menu_init(cls, map: Map, path: str, path_dict: str) -> None:
-        cls.map = map
-        cls.path_dict = path_dict
-        cls.path = path
-        cls.speed = cls.map.speed
+    def menu_init(cls, info: bool = False) -> None:
+        """ Init menu data and map file listing """
+        map_root = Path(ROOT_NAME)
 
-        cls.dirs = [key for key, _ in path_dict.items()]
-        dir_name = ["challenger", "hard", "medium", "easy"]
-        for name in dir_name:
-            if name in cls.dirs:
-                cls.dirs.remove(name)
-                cls.dirs.insert(0, name)
+        cls.info = info
 
-        for dir, _ in cls.path_dict.items():
-            cls.path_dict[dir].sort()
+        try:
+            cls.path_dict = {
+                dirm.name: [maps.name for maps in dirm.iterdir()
+                            if maps.is_file()]
+                for dirm in map_root.iterdir()
+                if dirm.is_dir()
+            }
+            for directory_name, _ in cls.path_dict.items():
+                cls.path_dict[directory_name].sort()
+
+            cls.dirs = [key for key, _ in cls.path_dict.items()]
+            if len(cls.dirs) <= 0:
+                raise FileNotFoundError("File not found")
+            dir_name = ["challenger", "hard", "medium", "easy"]
+            for name in dir_name:
+                if name in cls.dirs:
+                    cls.dirs.remove(name)
+                    cls.dirs.insert(0, name)
+        except FileNotFoundError as e:
+            print(e)
+            sys.exit(1)
+
+        f_dir = cls.dirs[0]
+        cls.path = ROOT_NAME + f_dir + '/' + cls.path_dict[f_dir][0]
 
         cls.idx_file = 0
         cls.idx_dir = 0
-        cls.file_name = path.split('/')[-1]
+        cls.file_name = cls.path.split('/')[-1]
+        cls.map = None
+        cls.speed = SPEED
 
-    def get_path_map(self, dir: str, map_file: str) -> str:
-        return ROOT_NAME + dir + '/' + map_file
+    def get_path_map(self, directory_name: str, map_file: str) -> str:
+        """ Return full map path from directory and file """
+        root_name = str(ROOT_NAME)
+        return root_name + directory_name + '/' + map_file
 
-    def change_map(self):
+    def change_map(self) -> None:
+        """ Load current map and validate it """
         log = self.query_one(Log)
         try:
             map_data = get_data(self.path)
             check_data(map_data)
             self.map = Map.map_init(map_data)
         except Exception as e:
+            self.map = None
+            log.clear()
             log.write("Invalid map file format")
             log.write(f"{e}")
             return
         self.map.speed = self.speed
 
     def compose(self) -> ComposeResult:
+        """ Compose textual UI widgets """
         with Vertical():
             yield Label("Fly In", id="title")
             with Horizontal():
@@ -135,7 +173,7 @@ class Menu(App):
                     with Horizontal(classes="selector"):
                         yield Button("+", id="btn-plus",
                                      classes="selector-btn")
-                        speed = round(self.map.speed, 1)
+                        speed = round(SPEED, 1)
                         yield Label(
                             f"{speed} ms\n[b]speed[/b]",
                             id="speed_label",
@@ -148,22 +186,37 @@ class Menu(App):
                                  classes="btn")
 
                 with Vertical(id="console"):
-                    yield Log(id="log")
+                    yield Log(id="log", auto_scroll=True)
+
+    def on_mount(self) -> None:
+        """ Configure widgets at startup """
+        self.query_one(Log).can_focus = False
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        """ Handle sidebar button actions """
         log = self.query_one(Log)
         match event.button.id:
             case "btn-sim":
-                log.clear()
-                log.write(self.map.print_path())
+                self.change_map()
+                if self.map:
+                    log.clear()
+                    log.write(self.map.print_path())
+                    if self.info:
+                        log.write("\nINFO\n")
+                        for info in self.map.stat_info:
+                            log.write(info)
 
             case "btn-clean-sim":
                 log.clear()
 
             case "btn-pg":
-                animate(self.map, self.map.speed)
+                self.change_map()
+                if self.map:
+                    animate(self.map, self.map.speed)
 
             case "btn-plus":
+                if self.map is None:
+                    return
                 self.map.speed += 0.1
                 self.speed += 0.1
                 speed = round(self.map.speed, 1)
@@ -171,6 +224,8 @@ class Menu(App):
                     f"{speed} ms\n[b]speed[/b]"
                 )
             case "btn-minus":
+                if self.map is None:
+                    return
                 self.map.speed -= 0.1
                 self.speed -= 0.1
                 speed = round(self.map.speed, 1)
@@ -198,15 +253,16 @@ class Menu(App):
                 self.exit()
 
     def _update_dir(self) -> None:
+        """ Update selected directory and file """
         dirm = self.dirs[self.idx_dir]
         self.query_one("#dir-label", Label).update(dirm)
         self.idx_file = 0
         self._update_file()
 
     def _update_file(self) -> None:
+        """ Update selected file and UI label """
         dirm = self.dirs[self.idx_dir]
         filem = self.path_dict[dirm][self.idx_file]
         self.path = self.get_path_map(dirm, filem)
         self.file_name = self.path.split('/')[-1]
         self.query_one("#file-label", Label).update(self.file_name)
-        self.change_map()

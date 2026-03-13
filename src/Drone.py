@@ -3,7 +3,12 @@ from .Connection import Connection
 from typing import List
 
 
+Position = list[float]
+
+
 class Drone():
+    """ Drone object and movement state """
+
     def __init__(self, name: str, c_hub: Hub):
         """ Set default setting """
         self.name = name
@@ -12,11 +17,11 @@ class Drone():
         self.len_path = 1
         self.nb_step = 0
         self.__stay = False
-        self.__path = []
+        self.__path: List[List[str]] = []
         self.con = None
-        self.proj_pos = [0, 0]
-        self.start_pos = [0, 0]
-        self.end_pos = [0, 0]
+        self.proj_pos: Position = [0.0, 0.0]
+        self.start_pos: Position = [0.0, 0.0]
+        self.end_pos: Position = [0.0, 0.0]
 
     @property
     def name(self) -> str:
@@ -82,12 +87,12 @@ class Drone():
         self.__stay = stay
 
     @property
-    def path(self) -> bool:
+    def path(self) -> List[List[str]]:
         """ Return path to goal """
         return self.__path
 
     @path.setter
-    def path(self, path) -> None:
+    def path(self, path: List[List[str]]) -> None:
         """ Set paht to goal """
         self.__path = path
 

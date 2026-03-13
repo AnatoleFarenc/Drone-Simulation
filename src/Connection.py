@@ -3,16 +3,23 @@ from .Hub import Hub
 
 
 class Connection():
+    """ Connection between two hubs """
+
     def __init__(self, hubs: Tuple[Hub, Hub],
                  complementary_setting: Dict = {}) -> None:
+        """ Init connection settings """
         self.hubs = hubs
         self.c_setting = complementary_setting
         self.__is_visible = True
+        self.__capacity: int = 0
+        self.__m_capacity: int = 1
         self.capacity = 0
         self.m_capacity = 1
 
         if self.c_setting.get('max_link_capacity'):
             value = self.c_setting.get('max_link_capacity')
+            if value is None:
+                raise ValueError("error: invalid value None")
             try:
                 value = int(value)
             except ValueError:
@@ -57,7 +64,7 @@ class Connection():
         return self.__capacity
 
     @capacity.setter
-    def capacity(self, nb_drone) -> None:
+    def capacity(self, nb_drone: int) -> None:
         """ Update the number of drone in link """
         self.__capacity = nb_drone
 
@@ -67,9 +74,16 @@ class Connection():
         return self.__m_capacity
 
     @m_capacity.setter
-    def m_capacity(self, nb_drone) -> None:
+    def m_capacity(self, nb_drone: int) -> None:
         """ Update the number of max drone in link """
         self.__m_capacity = nb_drone
 
     def __str__(self) -> str:
+        """ Return connection as string """
         return f"{self.hubs[0].name}-{self.hubs[1].name}"
+
+    @property
+    def name(self) -> str:
+        """ Return name of connection """
+        h1, h2 = self.hubs
+        return f"{h1.name}-{h2.name}"

@@ -1,8 +1,14 @@
 from typing import Tuple, Dict, List, Any
+from src.config import HUB_C
 from math import inf
 
 
+Color = str | tuple[int, int, int]
+
+
 class Hub():
+    """ Hub node object """
+
     def __init__(self, name: str, pos: Tuple[int, int],
                  complementary_setting: Dict[Any, Any],
                  s_e_name: str = ""):
@@ -10,10 +16,11 @@ class Hub():
         self.__c_setting: Dict[Any, Any] = {}
         self.__neighbors: List["Hub"] = []
         self.__nb_drone: int = 0
-        self.__max_drone: int = 1
+        self.__max_drone: int | float = 1
         self.__weight: int = 1
         self.__is_visible = True
         self.__is_blocked = False
+        self.__color: Color = HUB_C
 
         self.name = name
         self.pos = pos
@@ -24,6 +31,9 @@ class Hub():
         else:
             if self.name == s_e_name:
                 self.max_drone = inf
+
+        if self.c_setting.get("color"):
+            self.color = self.c_setting["color"]
 
     @property
     def name(self) -> str:
@@ -68,6 +78,7 @@ class Hub():
             raise ValueError("Error: complementary_setting must be dict")
 
     def __str__(self) -> str:
+        """ Return hub name as string """
         return self.__name
 
     @property
@@ -85,7 +96,7 @@ class Hub():
         return self.__nb_drone
 
     @nb_drone.setter
-    def nb_drone(self, nb_drone) -> None:
+    def nb_drone(self, nb_drone: int) -> None:
         """ Set nb dorne in hub """
         self.__nb_drone = nb_drone
 
@@ -120,11 +131,21 @@ class Hub():
         self.__is_blocked = is_blocked
 
     @property
-    def max_drone(self) -> bool:
+    def max_drone(self) -> int | float:
         """ Return max drone capacity """
         return self.__max_drone
 
     @max_drone.setter
-    def max_drone(self, max_drone: bool) -> None:
+    def max_drone(self, max_drone: int | float) -> None:
         """ Set max_drone capacity """
         self.__max_drone = max_drone
+
+    @property
+    def color(self) -> Color:
+        """ Return color of hub """
+        return self.__color
+
+    @color.setter
+    def color(self, color: Color) -> None:
+        """ Set color to hub """
+        self.__color = color

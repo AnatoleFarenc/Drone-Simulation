@@ -1,4 +1,4 @@
-nb_drones: abc
+nb_drones: 10
 
 start_hub: start 0 0 [color=green max_drones=12]
 

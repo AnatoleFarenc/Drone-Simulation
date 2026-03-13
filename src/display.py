@@ -17,6 +17,7 @@ def init_curses(stdsrc: curses.window):
 
 
 def display_map(stdscr: curses.window, map: Map):
+    """ Draw map hubs in terminal """
     y_offset = 3
     x_offset = 5
     s_x, s_y = map.start.pos

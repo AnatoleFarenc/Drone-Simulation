@@ -7,7 +7,9 @@ import re
 
 
 class Map():
+    """ Object to set map for fly in """
     def __init__(self):
+        """ Construct for map init """
         self.__nb_drone = 0
         self.__start = None
         self.__end = None
@@ -17,6 +19,8 @@ class Map():
         self.__project_pos = dict()
         self.__movements = []
         self.__speed = SPEED
+
+        self.stat_info = []
 
     @property
     def nb_drone(self) -> int:
@@ -161,10 +165,10 @@ class Map():
         for hub in hub_lst:
             x, y = hub.pos
 
-            x -= x_center
-            y -= y_center
-            x_p = width/2 + x * scale
-            y_p = height/2 - y * scale
+            x_rel = float(x) - x_center
+            y_rel = float(y) - y_center
+            x_p = width / 2 + x_rel * scale
+            y_p = height / 2 - y_rel * scale
             self.project_pos.update({hub.name: (x_p, y_p)})
 
     @classmethod
@@ -244,7 +248,7 @@ class Map():
             name = f"D{i + 1}"
             self.drone_lst.append(Drone(name, self.start))
 
-    def search_connection(self, h_n1, h_n2) -> Connection:
+    def search_connection(self, h_n1: str, h_n2: str) -> Connection | None:
         """ Search connection between to hub name """
         for con in self.connection_lst:
             h1, h2 = con.hubs
@@ -260,39 +264,19 @@ class Map():
                 return drone
         return None
 
-    def update_wheight(self) -> None:
-        hub_lst = self.hub_lst
-        for hub in hub_lst:
-            if hub.c_setting.get("zone"):
-                if hub.c_setting['zone'] == 'blocked':
-                    hub.is_visible = False
-                    continue
-                if hub.c_setting['zone'] == 'restricted':
-                    hub.weight = 4
-                elif hub.c_setting['zone'] == 'priority':
-                    hub.weight = 1
-                else:
-                    hub.weight = 2
-
-            if hub.nb_drone >= hub.max_drone:
-
-                hub.is_blocked = True
-            else:
-                hub.is_blocked = False
-
     def set_target(self, drone: Drone, target: Hub) -> None:
         """ Set target to the drone """
 
         if drone.nb_step < drone.len_path and drone.nb_step > 0:
             return
-        
-        if drone.con:
-            drone.con.capacity = max (0, drone.con.capacity - 1)
 
         drone.n_hub = target
 
-        drone.con = self.search_connection(drone.c_hub.name, drone.n_hub.name)
-        # con = 
+        drone.con = self.search_connection(drone.c_hub.name, target.name)
+
+        if drone.con is None:
+            drone.stay = True
+            return
 
         if target.c_setting.get("zone") == "restricted":
             drone.len_path = 2
@@ -310,30 +294,49 @@ class Map():
         """ Move the drone to the next destionation """
         if drone.stay:
             return f"{drone.name}-stay"
+        if drone.n_hub is None:
+            return f"{drone.name}-stay"
         drone.nb_step += 1
-        if drone.nb_step != drone.path:
-            drone.c_hub.nb_drone -= 1
+        # if drone.nb_step != drone.path:
+        drone.c_hub.nb_drone -= 1
         if drone.nb_step >= drone.len_path:
             drone.n_hub.nb_drone += 1
             drone.c_hub = drone.n_hub
             drone.nb_step = 0
+
             return f"{drone.name}-{drone.n_hub.name}"
         else:
             return (f"{drone.name}-{drone.c_hub.name}-"
                     f"{drone.n_hub.name}")
 
+    def get_hub_stat(self, idx_turn: int) -> None:
+        """ Get info to same drone at time """
+        info = ""
+        h_lst = [self.start] + self.hub_lst[:] + [self.end]
+        for hub in h_lst:
+            info += f" - Zone {hub.name}: {hub.nb_drone}/{hub.max_drone}\n"
+        self.stat_info.append(f"Turn {idx_turn}:\n")
+        self.stat_info.append(info)
 
     def play_map(self) -> List[List[str]]:
+        """ Play movement of drone in map """
         from src.Pathfinder import Pathinder
         pf = Pathinder(self)
         self.movements = []
+
+        for hub in self.hub_lst:
+            zone = hub.c_setting.get("zone")
+            if zone == "blocked":
+                hub.is_visible = False
+
+        idx_turn = 1
         while self.end.nb_drone < self.nb_drone:
             movements_turn = []
             all_stuck = True
 
-            # clear end connection
+            # release finished connections before computing new targets
             for drone in self.drone_lst:
-                if drone.c_hub == self.end and drone.con:
+                if drone.nb_step == 0 and drone.con:
                     drone.con.capacity = max(0, drone.con.capacity - 1)
                     drone.con = None
 
@@ -341,20 +344,27 @@ class Map():
                 if drone.c_hub == self.end:
                     continue
 
-                drone.path = pf.get_path_for_drone(drone)
-                if drone.path:
+                drone_path_raw = pf.get_path_for_drone(drone)
+                drone_path: list[Hub] = (
+                    drone_path_raw if drone_path_raw else []
+                )
+                if drone_path:
                     all_stuck = False
-                    self.set_target(drone, drone.path.pop(0))
+                    self.set_target(drone, drone_path.pop(0))
                     movements_turn.append(self.move_drone(drone))
 
             if all_stuck:
                 self.movements = [["impossible"]]
                 return [["impossible"]]
 
+            self.get_hub_stat(idx_turn)
+            idx_turn += 1
+
             self.movements.append(movements_turn)
         return self.movements
 
     def print_path(self) -> str:
+        """ return Path of drones """
         if not self.movements:
             self.play_map()
             if not self.movements:
