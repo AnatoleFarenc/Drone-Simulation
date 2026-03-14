@@ -15,6 +15,8 @@ The project allows a lot of freedom, but still comes with a set of requirements:
 The project also includes a bonus objective: complete the provided maps
 within a limited number of moves.
 
+![Fly-In Visualizer](./data/img/visualizer.gif)
+
 # Instructions
 In this section, we explain how to install and run the program.
 
