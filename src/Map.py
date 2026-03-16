@@ -297,7 +297,6 @@ class Map():
         if drone.n_hub is None:
             return f"{drone.name}-stay"
         drone.nb_step += 1
-        # if drone.nb_step != drone.path:
         drone.c_hub.nb_drone -= 1
         if drone.nb_step >= drone.len_path:
             drone.n_hub.nb_drone += 1
@@ -323,6 +322,10 @@ class Map():
         from src.Pathfinder import Pathinder
         pf = Pathinder(self)
         self.movements = []
+
+        if self.nb_drone <= 0:
+            self.movements = [["impossible"]]
+            return [["impossible"]]
 
         for hub in self.hub_lst:
             zone = hub.c_setting.get("zone")
