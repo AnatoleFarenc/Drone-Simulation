@@ -1,5 +1,3 @@
-*This project has been created as part of the 42 curriculum by anfarenc.*
-
 # Description
 Fly-in is a project that simulates the movement of drones. Through this project, I learned
 how to adapt a graph algorithm to optimize drone pathfinding,
